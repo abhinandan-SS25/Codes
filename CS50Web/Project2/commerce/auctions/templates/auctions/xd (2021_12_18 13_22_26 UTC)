@@ -1,0 +1,165 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>{% block title %}Auctions{% endblock %}</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <link href="{% static 'auctions/styles.css' %}" rel="stylesheet">
+    </head>
+    <body style="background-color:#FFFFF5">
+        <div class="jumbotron jumbotron-fluid text-center" style="height:260px; background-color: rgb(20, 4, 114); color: #FFFFF5; text-decoration:overline;">
+            <div class="container">
+            <h1 class="display-4"><b>AUCTIONS</b></h1>
+            <p class="lead">
+                {% if user.is_authenticated %}
+                <b>Hi There! Hope you have a Great Day! </b>
+                    Signed in as <strong>{{ user.username }}</strong>
+                {% else %}
+                <b>Hi There! Hope you have a Great Day!</b>
+                Not signed in.
+                {% endif %}
+            </p>
+            </div>
+            <hr style="background-color:white">
+            <div>
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      <b>EXPLORE</b>
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item" href="{% url 'index' %}">Active Listings</a>
+                        <a class="dropdown-item" href="{% url 'categories' %}">Categories</a>
+                    </div>
+                  </div>                
+            </div>
+          </div>
+        
+        
+        <hr>
+        {% block body %}
+        {% endblock %}
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> 
+    </body>
+</html>
+
+
+
+{% if user.is_authenticated %}
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'watchlist' %}">Watchlist</a>
+</li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'create_listing' %}">Create Listing</a>
+    </li>
+{% else %}
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'login' %}">Log In</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'register' %}">Register</a>
+    </li>
+{% endif %}
+</ul>
+
+
+
+
+<p class="lead" style="background-color:ebony"><b>VIEW THE CATEGORIES OF THE ITEMS AVAILABLE</b></p>
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>{% block title %}Auctions{% endblock %}</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <link href="{% static 'auctions/styles.css' %}" rel="stylesheet">
+    </head>
+    <body style="background-color:#FFFFF5">
+        <div class="jumbotron jumbotron-fluid text-center" style="height:225px; border-color:rgb(6, 69, 128);border-style:hidden inset hidden inset; border-width: 75px; border-radius: 5px; background-color: rgb(8, 91, 168); color: #ffffff; text-decoration:solid;">
+            <div class="container">
+            <h1 class="display-4"><b><strong>LOGIN</strong></b></h1>
+            <hr>
+            <p class="lead" style="color:rgb(228, 246, 255)">
+                <b>Log In To AUCTION with your Account</b>
+            </p>
+            </div>
+        </div>  
+            
+        <div class="text-center">
+            <div style="margin:25px">
+                <div><button class="btn btn-outline-dark" type="button" data-target="#d" data-toggle="collapse" aria-expanded="false" aria-controls="d">EXPLORE</button></div>
+                        <div class="collapse" id="d">
+                            <hr>
+                        <a class="dropdown-item" href="{% url 'index' %}">Active Listings</a>
+                        <a class="dropdown-item" href="{% url 'categories' %}">Categories</a>
+                    </div>
+            </div>
+            <div>
+                {% if not user.is_authenticated %} 
+                    <div><button class="btn btn-outline-dark" type="button" data-target="#dm_a" data-toggle="collapse" aria-expanded="false" aria-controls="dm_a">ACTION</button></div>
+                        <div class="collapse" id="dm_a">
+                            <hr>
+                        <a class="dropdown-item" href="{% url 'login' %}">Log In</a>
+                        <a class="dropdown-item" href="{% url 'register' %}">Register</a>
+                    </div>
+                  {% endif %} 
+                </div>
+                <div style="margin:25px">
+                  {% if user.is_authenticated %}
+                  <button class="btn btn-outline-dark" type="button" data-target="#dm_c" data-toggle="collapse" aria-expanded="false" aria-controls="dm_c">
+                    PROFILE
+                  </button>
+                  <div class="collapse" id="dm_c">
+                      <hr>
+                      <a class="dropdown-item" href="{% url 'watchlist' %}">Watchlist</a>
+                      <a class="dropdown-item" href="{% url 'create_listing' %}">Create Listing</a>
+                      <a class="dropdown-item" href="{% url 'logout' %}">Log Out</a>
+                  </div>
+                {% endif %} 
+            </div>
+          </div>
+        </div>
+        
+        <hr>
+
+{% block body %}
+
+<div class="jumbotron d-block-w-100" style="background-color:#2f5813; height:250px">
+    <div class="container text-center ">
+        <h1 class="display-6" style="color:azure"><b>LOGIN</b></h1>
+        <p class="lead" style="color:azure"><b>LOGIN TO YOUR ACCOUNT</b></p>
+    </div>
+</div>
+
+    {% if message %}
+        <div class="text-center">{{ message }}</div>
+    {% endif %}
+
+    <div class="jumbotron text-center" style="background-color: #FFFFF5;">
+    <form action="{% url 'login' %}" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <input autofocus class="form-control" type="text" name="username" placeholder="Username">
+        </div>
+        <div class="form-group">
+            <input class="form-control" type="password" name="password" placeholder="Password">
+        </div>
+        <input class="btn btn-primary" type="submit" value="Login">
+    </form></div>
+
+    <p class="lead">Don't have an account? <a href="{% url 'register' %}">Register here.</a></p>
+    
+
+    </div>
+
+{% endblock %}
+
+
+
+

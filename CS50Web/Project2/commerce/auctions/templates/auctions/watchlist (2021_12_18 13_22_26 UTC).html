@@ -1,0 +1,67 @@
+{% extends "auctions/layout.html" %}
+
+{% block title %}
+    {{c_name}}
+{% endblock %}
+
+{% block body %}
+<div class="jumbotron" style="background-color:#FFFFF5; height:145px;">
+    <div class="container text-center ">
+          <h1 class="display-6"><b>WATCHLIST</b></h1><hr>
+          <p class="lead" style="background-color:ebony"><b></b></p>
+          <div style="background-color: #FFFFF5;">
+          <ul class="list-group list-group-flush" style="background-color: #FFFFF5;">
+            {% for w in watching %}
+            <li class="list-group-item float-left" style="background-color: #FFFFF5;">
+            <form action="/LISTING" >
+                <input type="hidden" name="l_name" value="{{w.item_name}}">
+                <button type="submit" class="btn">{{w.item_name}}</button>
+            </form></li>
+            {% endfor %}
+          </ul>
+          </div>
+
+          <div style="margin:25px;">
+            <button class="btn btn-outline-danger" type="button" data-target="#detailed_view" data-toggle="collapse" aria-expanded="false" aria-controls="detailed_view">DETAILED VIEW</button>
+        </div>
+            <div class="collapse" id="detailed_view">
+            <hr>
+            <div class="card-columns text-center" style="padding: 55px;margin: 0px;">
+                {% for itemw in watching %}
+                {% for item in items %}    
+                {% if item.title|stringformat:"s" == itemw.item_name|stringformat:"s" %}
+                <div class="card p-3" style="box-shadow: 4px 3px 8px 1px #969696;-webkit-box-shadow: 4px 3px 8px 1px #969696; border-radius: 20px; padding: 5px; border-color: rgb(2, 67, 121); margin: 25px; width: 90%; height: 75%;">
+                    {% if item.picture is None %}
+                    <img src="https://cdn0.iconfinder.com/data/icons/technology-business-and-people/1000/file_light-15-512.png" style="height:50%; width:50%" class="card-img-top">
+                    {% else %}
+                    <img src={{item.picture}} class="card-img-top" style="height:50%; width:50%">
+                    {% endif %}
+                    <div class="card-body">
+                      <h3 class="card-title">{{item.title}}</h3>
+                      <p class="card-text"><i>{{item.description}}</i></p>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                      <li class="list-group-item">CATEGORY: {%if item.status in "A"%}<p style="color:darkcyan"><b>(ACTIVE)</b></p>{% else %}<p style="color:brown"><b>(CLOSED)</b></p>{% endif %} {{item.category}}</li>
+                      <li class="list-group-item">Item Listed By: {{item.username}}</li>
+                      <li class="list-group-item">Item Listing Date: {{item.listing_open_date}}</li>
+                    </ul>
+                    <div class="card-body">
+                        <h6 class="card-title">$ {{item.c_price}}</h6>
+                        <div class="card-body">
+                        <form action="/LISTING" >
+                            <input type="hidden" name="l_name" value="{{item.title}}">
+                            <button type="submit" class="btn btn-outline-info">View Listing</button>
+                        </form></div>
+                    </div>
+                  </div>
+                {% endif %}
+                {% endfor %}{% endfor %}
+                </div>            
+            </div>
+          <hr>
+    </div>
+</div>
+
+
+
+{% endblock %}

@@ -1,0 +1,188 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+{% if user.is_authenticated %}
+    <div class="text-center" style="padding:20px; margin:5px;">
+        <form id="newpostform" method="POST" action="{% url 'index' %}">
+            {% csrf_token %}
+            <h1 class="display-6 float-left">ADD NEW POST</h1>
+            <div class="form-group">
+                <textarea name="post_body" id="post_body" placeholder="Type your post" rows="4" autofocus="true" cols="140" style="border-radius:10px; margin:10px;"></textarea>
+                <input type="submit" class="btn btn-outline-info" value="Post">
+            </div>
+            <div id="req"></div>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    document.querySelector("#newpostform").onsubmit = function() {
+                    if ( document.querySelector("#post_body").value === "" ) {
+                        var alert_div=document.createElement("div");
+                        alert_div.innerHTML=`
+                        <div class="alert alert-danger" role="alert">
+                            Please enter some text to post.
+                        </div>`;
+                        document.querySelector("#req").append(alert_div);
+                        return false;
+                    }
+                    else if (document.querySelector("#post_body").length >= 2000 ) {
+                        var alert_div=document.createElement("div");
+                        alert_div.innerHTML=`
+                        <div class="alert alert-danger" role="alert">
+                            Can't enter more than 2000 characters.
+                        </div>`;
+                        document.querySelector("#req").append(alert_div);
+                        return false;
+                    } 
+                    else {
+                        var alert_div=document.createElement("div");
+                        alert_div.innerHTML=`
+                        <div class="alert alert-success" role="alert">
+                            Added new post
+                        </div>`;
+                        document.querySelector("#req").append(alert_div);  
+                    }
+                };
+            }); 
+            </script>
+        </form>
+    </div>
+    <hr>
+{% endif %}
+
+{% for post in page_obj %}
+<div id='{{post.id}}' style="margin:5px; display: flex; padding:20px; border-width: 2px; border-radius:15px; border-color: rgb(214, 214, 214); border-style: groove;">
+    <div style="width:1200px; overflow-wrap: break-word;">
+        <h4 id="H{{post.id}}">{{ post.post_body }}</h4>
+        <h5><form action="view_profile">
+            <input type="hidden" name="profile_name" value="{{ post.post_by }}">
+            <button type="submit" class="btn btn-outline-dark" style="border-style:hidden;">{{ post.post_by }}</button>
+        </form></h5>
+    </div>
+    <div class="float-right">
+        <p>Posted On: {{post.post_time}}</p>
+        {% for p in likes %} 
+        {% if p.id == post.id %}
+        
+        <p id="set_likes{{post.id}}">Likes: {{p.total_likes}}</p>
+        
+        {% endif %}
+        {% endfor %}
+        {% if current_u == post.post_by %}
+        <button id="D{{post.id}}" data-body="{{post.post_body}}" data-id="{{post.id}}" data-by="{{post.post_by}}" data-on="{{post.post_time}}" onclick="edit_post('{{post.id}}')" class="btn btn-outline-warning">Edit Post</button>
+        <script>
+            function edit_post (id) {
+                var t_element=document.querySelector(`#D${id}`);
+                var body=t_element.dataset.body;
+                document.querySelector(`#H${id}`).innerHTML = `
+                <textarea id="T${id}" style="width:1000px;">${body}</textarea>`;
+                document.querySelector(`#D${id}`).className ="btn btn-outline-success"
+                document.querySelector(`#D${id}`).innerHTML="Save Post";
+                document.getElementById(`D${id}`).setAttribute("onclick", `save_post('${id}')`);
+            }
+            
+            
+            function save_post (id) {
+                var data=document.querySelector(`#D${id}`).dataset;
+                document.querySelector(`#D${id}`).innerHTML="Saving Post...";
+                fetch('/', {
+                    method:"POST",
+                    body: JSON.stringify({
+                        operation:"save_edited_post",
+                        postid:data.id,
+                        postbody:document.querySelector(`#T${id}`).value,
+                    })
+                }).then( function relaod () {
+                    var b = document.querySelector(`#T${id}`).value
+                    document.querySelector(`#H${id}`).innerHTML = `${b}`;
+                    document.querySelector(`#D${id}`).className ="btn btn-outline-warning"
+                    document.querySelector(`#D${id}`).innerHTML="Edit Post";
+                    document.getElementById(`D${id}`).setAttribute("onclick", `edit_post('${id}')`);
+                    document.getElementById(`D${id}`).setAttribute("data-body", `${b}`);
+                }  
+                )
+            }
+        </script>
+
+        {% else %}
+
+        {% if user.is_authenticated %}
+
+        {% for u in likes %}
+        {% if u.id == post.id %}
+
+        {% if u.liked == True %}
+            <button id="L{{post.id}}" data-id="{{post.id}}" onclick="unlike_post('{{post.id}}')" class="btn btn-outline-dark" style="width:100px;"> Unlike </button>
+        {% else %}
+            <button id="L{{post.id}}" data-id="{{post.id}}" onclick="like_post('{{post.id}}')" class="btn btn-outline-info" style="width:100px;"> Like </button>
+        {% endif %}
+
+        {% endif %}
+        {% endfor %}
+        
+        {% endif %}
+
+        <script>
+
+            function like_post(id) {
+                var data=document.querySelector(`#L${id}`).dataset;
+                document.querySelector(`#L${id}`).innerHTML="Liking ...";
+                fetch('/', {
+                    method:"POST",
+                    body: JSON.stringify({
+                        operation:"like_post",
+                        postid:data.id,
+                    })
+            }).then(response => response.json())
+                    .then(response => {
+                        document.querySelector(`#set_likes${id}`).innerHTML=`Likes: ${response.total_likes}`;
+                        console.log(response.total_likes);
+            }).then( function () {
+                document.querySelector(`#L${id}`).innerHTML="Unlike";
+                document.querySelector(`#L${id}`).className="btn btn-outline-dark";
+                document.querySelector(`#L${id}`).setAttribute("onclick", `unlike_post('${id}')`);
+            });
+        }
+
+
+        function unlike_post(id) {
+                var data=document.querySelector(`#L${id}`).dataset;
+                document.querySelector(`#L${id}`).innerHTML="Unliking ...";
+                fetch('/', {
+                    method:"POST",
+                    body: JSON.stringify({
+                        operation:"unlike_post",
+                        postid:data.id,
+                    })
+            }).then(response => response.json())
+                    .then(response => {
+                        document.querySelector(`#set_likes${id}`).innerHTML=`Likes: ${response.total_likes}`;
+                        console.log(response.total_likes);
+            }).then( function () {
+                document.querySelector(`#L${id}`).innerHTML="Like";
+                document.querySelector(`#L${id}`).className="btn btn-outline-info";
+                document.querySelector(`#L${id}`).setAttribute("onclick", `like_post('${id}')`);
+            });
+        } 
+
+        </script>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+
+<ul class="pagination list-group-horizontal justify-content-center">
+
+    {% if page_obj.has_previous %}
+    <li class="page-item"><a class="btn btn-outline-dark" href="?page=1">&laquo; First</a></li>
+    <li class="page-item"><a class="btn btn-light" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+    {% endif %}
+
+    <li class="page-item"><a class="btn btn-light"> {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</a></li>
+
+    {% if page_obj.has_next %}
+    <li class="page-item"><a class="btn btn-light" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+    <li class="page-item"><a class="btn btn-outline-dark" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a></li>
+    {% endif %}
+
+</ul>
+
+{% endblock %}

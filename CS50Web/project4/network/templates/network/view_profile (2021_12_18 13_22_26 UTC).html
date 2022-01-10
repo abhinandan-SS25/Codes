@@ -1,0 +1,199 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+
+<div class="jumbotron text-center" style="border-style: groove; background-color: white;">
+    <h1 class="display-4">{{username}}</h1>
+    <hr>
+    <ul class="list-group list-group-horizontal ">
+        <li class="list-group-item" style="border-style: hidden groove hidden hidden; width:700px;">
+            <p class="lead">Following:</p>
+            <p id="set_following">{{total_following}}</p>
+        </li>
+        <li class="list-group-item" style="border-style: hidden hidden hidden groove; width:700px;">
+            <p class="lead">Followers:</p>
+            <p id="set_followers">{{total_followers}}</p>
+        </li>
+      </ul>
+      <hr>
+      {% if user.is_authenticated %}
+      {% if c == username %}
+      {% else %}
+      {% if follows %}
+      <button id="follow_button" onclick="unfollow('{{username}}')" class="btn btn-outline-danger"> UNFOLLOW POSTS BY USER </button>
+      {% else %}
+      <button id="follow_button" onclick="follow('{{username}}')" class="btn btn-outline-success"> FOLLOW POSTS BY USER </button>
+      {% endif %}
+      {% endif %}
+      <script>
+
+          function follow(username) {
+              document.querySelector("#follow_button").innerHTML="Following user posts...";
+              fetch('/view_profile', {
+                  method:"POST",
+                  body: JSON.stringify({
+                      operation:"follow",
+                      account:`${username}`
+                  })
+              }).then(response => response.json())
+                    .then(response => {
+                        document.querySelector("#set_followers").innerHTML=`${response.total_followers}`;
+          }).then(
+              function() {
+                    document.querySelector("#follow_button").className="btn btn-outline-danger";
+                    document.querySelector("#follow_button").innerHTML="UNFOLLOW USER POSTS";
+                    document.querySelector("#follow_button").setAttribute("onclick", `unfollow('${username}')`)
+              }
+          );
+        }
+
+        function unfollow(username) {
+              document.querySelector("#follow_button").innerHTML="Unfollowing user posts...";
+              fetch('/view_profile', {
+                  method:"POST",
+                  body: JSON.stringify({
+                      operation:"unfollow",
+                      account:`${username}`
+                  })
+              }).then(response => response.json())
+                    .then(response => {
+                        document.querySelector("#set_followers").innerHTML=`${response.total_followers}`;
+          }).then(
+              function() {
+                    document.querySelector("#follow_button").className="btn btn-outline-success";
+                    document.querySelector("#follow_button").innerHTML="FOLLOW USER POSTS";
+                    document.querySelector("#follow_button").setAttribute("onclick", `follow('${username}')`)
+              }
+          );
+        }
+      </script>
+      {% endif %}
+</div>
+
+<div style="padding:25ps;">
+    <h3 class="display-6">Posts by user: {{username}}</h3>
+</div>
+
+
+{% for post in posts_user %}
+<div id='{{post.id}}' style="margin:5px; display: flex; padding:20px; border-width: 2px; border-radius:15px; border-color: rgb(214, 214, 214); border-style: groove;">
+    <div style="width:1200px; overflow-wrap: break-word;">
+        <h4 id="H{{post.id}}">{{ post.post_body }}</h4>
+        <h5><form action="view_profile">
+            <input type="hidden" name="profile_name" value="{{ post.post_by }}">
+            <button type="submit" class="btn btn-outline-dark" style="border-style:hidden;">{{ post.post_by }}</button>
+        </form></h5>
+    </div>
+    <div class="float-right">
+        <p>Posted On: {{post.post_time}}</p>
+        {% for p in likes %} 
+        {% if p.id == post.id %}
+        
+        <p id="set_likes{{post.id}}">Likes: {{p.total_likes}}</p>
+        
+        {% endif %}
+        {% endfor %}
+        {% if current_u == post.post_by %}
+        <button id="D{{post.id}}" data-body="{{post.post_body}}" data-id="{{post.id}}" data-by="{{post.post_by}}" data-on="{{post.post_time}}" onclick="edit_post('{{post.id}}')" class="btn btn-outline-warning">Edit Post</button>
+        <script>
+            function edit_post (id) {
+                var t_element=document.querySelector(`#D${id}`);
+                var body=t_element.dataset.body;
+                document.querySelector(`#H${id}`).innerHTML = `
+                <textarea id="T${id}" style="width:1000px;">${body}</textarea>`;
+                document.querySelector(`#D${id}`).className ="btn btn-outline-success"
+                document.querySelector(`#D${id}`).innerHTML="Save Post";
+                document.getElementById(`D${id}`).setAttribute("onclick", `save_post('${id}')`);
+            }
+            
+            
+            function save_post (id) {
+                var data=document.querySelector(`#D${id}`).dataset;
+                document.querySelector(`#D${id}`).innerHTML="Saving Post...";
+                fetch('/', {
+                    method:"POST",
+                    body: JSON.stringify({
+                        operation:"save_edited_post",
+                        postid:data.id,
+                        postbody:document.querySelector(`#T${id}`).value,
+                    })
+                }).then( function relaod () {
+                    var b = document.querySelector(`#T${id}`).value
+                    document.querySelector(`#H${id}`).innerHTML = `${b}`;
+                    document.querySelector(`#D${id}`).className ="btn btn-outline-warning"
+                    document.querySelector(`#D${id}`).innerHTML="Edit Post";
+                    document.getElementById(`D${id}`).setAttribute("onclick", `edit_post('${id}')`);
+                    document.getElementById(`D${id}`).setAttribute("data-body", `${b}`);
+                }  
+                )
+            }
+        </script>
+
+        {% else %}
+
+        {% if user.is_authenticated %}
+
+        {% for u in likes %}
+        {% if u.id == post.id %}
+
+        {% if u.liked == True %}
+            <button id="L{{post.id}}" data-id="{{post.id}}" onclick="unlike_post('{{post.id}}')" class="btn btn-outline-dark" style="width:100px;"> Unlike </button>
+        {% else %}
+            <button id="L{{post.id}}" data-id="{{post.id}}" onclick="like_post('{{post.id}}')" class="btn btn-outline-info" style="width:100px;"> Like </button>
+        {% endif %}
+
+        {% endif %}
+        {% endfor %}
+        
+        {% endif %}
+
+        <script>
+
+            function like_post(id) {
+                var data=document.querySelector(`#L${id}`).dataset;
+                document.querySelector(`#L${id}`).innerHTML="Liking ...";
+                fetch('/', {
+                    method:"POST",
+                    body: JSON.stringify({
+                        operation:"like_post",
+                        postid:data.id,
+                    })
+            }).then(response => response.json())
+                    .then(response => {
+                        document.querySelector(`#set_likes${id}`).innerHTML=`Likes: ${response.total_likes}`;
+                        console.log(response.total_likes);
+            }).then( function () {
+                document.querySelector(`#L${id}`).innerHTML="Unlike";
+                document.querySelector(`#L${id}`).className="btn btn-outline-dark";
+                document.querySelector(`#L${id}`).setAttribute("onclick", `unlike_post('${id}')`);
+            });
+        }
+
+
+        function unlike_post(id) {
+                var data=document.querySelector(`#L${id}`).dataset;
+                document.querySelector(`#L${id}`).innerHTML="Unliking ...";
+                fetch('/', {
+                    method:"POST",
+                    body: JSON.stringify({
+                        operation:"unlike_post",
+                        postid:data.id,
+                    })
+            }).then(response => response.json())
+                    .then(response => {
+                        document.querySelector(`#set_likes${id}`).innerHTML=`Likes: ${response.total_likes}`;
+                        console.log(response.total_likes);
+            }).then( function () {
+                document.querySelector(`#L${id}`).innerHTML="Like";
+                document.querySelector(`#L${id}`).className="btn btn-outline-info";
+                document.querySelector(`#L${id}`).setAttribute("onclick", `like_post('${id}')`);
+            });
+        } 
+
+        </script>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}

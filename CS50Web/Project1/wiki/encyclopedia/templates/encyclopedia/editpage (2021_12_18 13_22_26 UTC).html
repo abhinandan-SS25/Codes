@@ -1,0 +1,31 @@
+{% extends "encyclopedia/npl.html" %}
+
+{% block title %}
+    Edit Page
+{% endblock %}
+
+{% block body %}
+
+<h1>Edit the Page:</h1>
+<div>
+    <form method="POST" action="newpage.html">
+    {% csrf_token %}
+        <div>
+            <div style="height:25px;">
+                </div>
+            <div>
+                <h3>Content:</h3>
+            <textarea name="content" autocomplete="off" style="height:350px;">{{entry}}
+
+            </textarea>
+            </div>
+            <div style="height:25px;">
+            </div>
+            <input type="hidden" value="This is an edit" name="edit?">
+            <input type="hidden" value={{title}} name="title1">
+            <input type="submit" value="SAVE EDITED ENTRY">
+            
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>{% block title %}Auctions{% endblock %}</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <link href="{% static 'auctions/styles.css' %}" rel="stylesheet">
+    </head>
+    <body style="background-color:#FFFFF5">
+        <div class="jumbotron jumbotron-fluid text-center" style="height:225px; border-color:rgb(6, 128, 57);border-style:hidden inset hidden inset; border-width: 75px; border-radius: 5px; background-color: rgb(6, 110, 84); color: #ffffff; text-decoration:solid;">
+            <div class="container">
+            <h1 class="display-4"><b><strong>LOGIN</strong></b></h1>
+            <hr>
+            <p class="lead" style="color:rgb(228, 246, 255)">
+                <b>Log In To AUCTION with your Account</b>
+            </p>
+            </div>
+        </div>  
+            
+        <div class="text-center">
+            <div style="margin:25px">
+                <div><button class="btn btn-outline-dark" type="button" data-target="#d" data-toggle="collapse" aria-expanded="false" aria-controls="d">EXPLORE</button></div>
+                        <div class="collapse" id="d">
+                            <hr>
+                        <a class="dropdown-item" href="{% url 'index' %}">Active Listings</a>
+                        <a class="dropdown-item" href="{% url 'categories' %}">Categories</a>
+                    </div>
+            </div>
+        </div>
+        
+        <hr>
+
+    {% if message %}
+        <div class="text-center alert alert-danger">{{ message }}</div>
+    {% endif %}
+
+    <div class="jumbotron text-center" style="background-color: #FFFFF5; height:200px">
+    <form action="{% url 'login' %}" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <input autofocus class="form-control" type="text" name="username" placeholder="Username" autocomplete="off">
+        </div>
+        <div class="form-group">
+            <input class="form-control" type="password" name="password" placeholder="Password">
+        </div>
+        <input class="btn btn-outline-success" type="submit" value="Login">
+    </form></div>
+
+    <div class="text-center"><p class="lead">Don't have an account? <a href="{% url 'register' %}">Register here.</a></p></div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> 
+    
+
+    </body>

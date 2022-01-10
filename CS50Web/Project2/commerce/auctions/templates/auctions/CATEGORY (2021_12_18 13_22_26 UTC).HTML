@@ -1,0 +1,83 @@
+{% extends "auctions/layout.html" %}
+
+{% block title %}
+    {{c_name}}
+{% endblock %}
+
+{% block body %}
+
+<div class="jumbotron d-block-w-100" style="background-color:#581313; height:250px">
+    <div class="container text-center ">
+        <h1 class="display-6" style="color:azure"><b>{{c_name}}</b></h1>
+        <p class="lead" style="color:azure"><b>VIEW ALL THE ITEMS IN {{c_name}} CATEGORY</b></p>
+    </div>
+</div>
+    
+
+    
+<div class="card-columns text-center" style="padding: 55px;margin: 0px;">
+    {% for itm in itms %}
+    {% if itm.status|stringformat:"s" == "A" %}
+    {% if itm.category|stringformat:"s" == c_name|stringformat:"s" %}
+    <div class="card p-3" style="box-shadow: 4px 3px 8px 1px #969696;-webkit-box-shadow: 4px 3px 8px 1px #969696; border-radius: 20px; padding: 5px; border-color: rgb(2, 67, 121); margin: 25px; width: 90%; height: 75%;">
+        {% if itm.picture is None %}
+        <img src="https://cdn0.iconfinder.com/data/icons/technology-business-and-people/1000/file_light-15-512.png" style="height:50%; width:50%" class="card-img-top">
+        {% else %}
+        <img src={{itm.picture}} class="card-img-top" style="height:50%; width:50%">
+        {% endif %}
+        <div class="card-body">
+          <h3 class="card-title">{{itm.title}}</h3>
+          <p class="card-text"><i>{{itm.description}}</i></p>
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">CATEGORY: {%if itm.status in "A"%}<p style="color:darkcyan"><b>(ACTIVE)</b></p>{% else %}<p style="color:brown"><b>(CLOSED)</b></p>{% endif %} {{itm.category}}</li>
+            <li class="list-group-item">Item Listed By: {{itm.username}}</li>
+          <li class="list-group-item">Item Listing Date: {{itm.listing_open_date}}</li>
+        </ul>
+        <div class="card-body">
+            <h6 class="card-title">$ {{itm.c_price}}</h6>
+            <div class="card-body">
+            <form action="/LISTING" >
+                <input type="hidden" name="l_name" value="{{itm.title}}">
+                <button type="submit" class="btn btn-outline-info">View Listing</button>
+            </form></div>
+        </div>
+      </div>
+      {% endif %}{% endif %}
+{% endfor %} 
+</div>
+
+<div class="card-columns text-center" style="padding: 55px;margin: 0px;">
+    {% for itm in itms %}
+    {% if itm.status|stringformat:"s" == "C" %}
+    {% if itm.category|stringformat:"s" == c_name|stringformat:"s" %}
+    <div class="card p-3" style="box-shadow: 4px 3px 8px 1px #969696;-webkit-box-shadow: 4px 3px 8px 1px #969696; border-radius: 20px; padding: 5px; border-color: rgb(2, 67, 121); margin: 25px; width: 90%; height: 75%;">
+        {% if itm.picture is None %}
+        <img src="https://cdn0.iconfinder.com/data/icons/technology-business-and-people/1000/file_light-15-512.png" style="height:50%; width:50%" class="card-img-top">
+        {% else %}
+        <img src={{itm.picture}} class="card-img-top" style="height:50%; width:50%">
+        {% endif %}
+        <div class="card-body">
+          <h3 class="card-title">{{itm.title}}</h3>
+          <p class="card-text"><i>{{itm.description}}</i></p>
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">CATEGORY: {%if itm.status in "A"%}<p style="color:darkcyan"><b>(ACTIVE)</b></p>{% else %}<p style="color:brown"><b>(CLOSED)</b></p>{% endif %} {{itm.category}}</li>
+            <li class="list-group-item">Item Listed By: {{itm.username}}</li>
+          <li class="list-group-item">Item Listing Date: {{itm.listing_open_date}}</li>
+        </ul>
+        <div class="card-body">
+            <h6 class="card-title">$ {{itm.c_price}}</h6>
+            <div class="card-body">
+            <form action="/LISTING" >
+                <input type="hidden" name="l_name" value="{{itm.title}}">
+                <button type="submit" class="btn btn-outline-info">View Listing</button>
+            </form></div>
+        </div>
+      </div>
+      {% endif %}{% endif %}
+{% endfor %} 
+</div>
+
+    
+{% endblock %}

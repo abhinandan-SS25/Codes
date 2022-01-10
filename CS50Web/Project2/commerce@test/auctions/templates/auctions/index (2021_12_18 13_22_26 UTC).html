@@ -1,0 +1,17 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Active Listings</h2>
+
+    
+        {% for item in items %}
+        <ul>
+        {% if item.status in 'A' %}
+            <li>{{item.title}}</li>
+            <li>{{item.description}}</li>
+            <li></li>
+        {% endif %}</ul>
+        {% endfor %}
+   
+
+{% endblock %}

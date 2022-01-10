@@ -1,0 +1,44 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+<div class="jumbotron" style="background-color:#FFFFF5; height:50px">
+<div class="container text-center ">
+      <h1 class="display-6"><b>ACTIVE LISTINGS</b></h1>
+      <p class="lead" style="background-color:ebony"><b>EXPLORE THE ACTIVE LISTINGS</b></p>
+    </div>
+    </div>
+      
+
+    <div class="card-columns text-center" style="padding: 55px;margin: 0px;">
+    {% for item in items %}
+    {% if item.status in "A" %}
+    <div class="card p-3" style="box-shadow: 4px 3px 8px 1px #969696;-webkit-box-shadow: 4px 3px 8px 1px #969696; border-radius: 20px; padding: 5px; border-color: rgb(2, 67, 121); margin: 25px; width: 90%; height: 75%;">
+        {% if item.picture is None %}
+        <img src="https://cdn0.iconfinder.com/data/icons/technology-business-and-people/1000/file_light-15-512.png" style="height:50%; width:50%" class="card-img-top">
+        {% else %}
+        <img src={{item.picture}} class="card-img-top" style="height:50%; width:50%">
+        {% endif %}
+        <div class="card-body">
+          <h3 class="card-title">{{item.title}}</h3>
+          <p class="card-text"><i>{{item.description}}</i></p>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">CATEGORY: {{item.category}}</li>
+          <li class="list-group-item">Item Listed By: {{item.username}}</li>
+          <li class="list-group-item">Item Listing Date: {{item.listing_open_date}}</li>
+        </ul>
+        <div class="card-body">
+            <h6 class="card-title">$ {{item.c_price}}</h6>
+            <div class="card-body">
+            <form action="/LISTING" >
+                <input type="hidden" name="l_name" value="{{item.title}}">
+                <button type="submit" class="btn btn-outline-info">View Listing</button>
+            </form></div>
+        </div>
+      </div>
+    {% endif %}
+    {% endfor %}
+    </div>
+
+    
+{% endblock %}

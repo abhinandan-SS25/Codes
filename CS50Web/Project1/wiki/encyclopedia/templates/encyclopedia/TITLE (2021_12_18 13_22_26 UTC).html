@@ -1,0 +1,49 @@
+{% extends "encyclopedia/layout.html" %}
+
+{% block title %}
+    {{title}}
+{% endblock %}
+
+{% block body %}
+
+{% if e_m is 0 %}
+        <h3 style="color:rgb(121, 13, 13)">ERROR</h3>
+        <h3>{{title}}-----Returned: Exists error</h3>
+        <h4>Page by the title of "{{name}}"" already exists.</h4>
+{% else %}
+    
+    {% if entry is None %}
+
+    <h2 style="color:rgb(55, 92, 12)">Search Results:</h2>
+
+        {% for p in pages %}
+
+            {% if title.lower in p.lower %}
+
+                <ul>
+                    <li><a href="/{{p}}">{{p}}</li></a>
+                </ul>
+
+            {% endif %}
+
+        {% endfor %}
+        <p>------------------------------------------------</p>
+        
+        <h3 style="color:rgb(121, 13, 13)">ERROR</h3>
+        <h3>{{title}}-----Returned: {{entry}}</h3>
+        <h4>No entry by the name of "{{title}}"</h4>
+
+    {% else %}
+
+    <h1>----------------------{{title}}--------------------</h1>
+    {{entry|safe}}
+    <p><form action="index/editpage.html" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name=title value={{title}}>
+        <input type="submit" value="Edit this page">
+    </form></p>
+
+    {% endif %}
+    {% endif %}
+
+{% endblock %}

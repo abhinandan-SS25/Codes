@@ -1,0 +1,88 @@
+{% extends "auctions/layout.html" %}
+
+{% block title %}
+{{listitem.title}}
+{% endblock %}
+
+{% block body %}
+<div class="jumbotron text-center" style="border-radius: 30px; background-color:#ffffff;">
+    
+    <h1 class="display-4"><b>{{listitem.title}}</b></h1><hr>
+    
+    {%if listitem.status in "A"%}<h3 style="color:darkcyan; margin:20px"><b>(ACTIVE)</b></h3>{% else %}<h3 style="color:brown; margin:20px"><b>(CLOSED)</b></h3>{% endif %}
+        
+    <ul class="list-group list-group-horizontal"><li class="list-group-item" style="width:1900px; border-top: hidden; border-bottom: hidden;"><h1 class="display-5"><strong>Current Price: $ {{listitem.c_price}}</strong></li></ul>
+    <hr><ul class="list-group list-group-horizontal">
+        <li class="list-group-item" style="width:450px; border-top: hidden; border-bottom: hidden;">Created by: {{listitem.username}}</li>
+        <li class="list-group-item" style="width:450px; border-top: hidden; border-bottom: hidden;">Listing Opened At: {{listitem.listing_open_date}}</li>
+        <li class="list-group-item" style="width:450px; border-top: hidden; border-bottom: hidden;">Category: {{listitem.category}}</li>
+        <li class="list-group-item" style="width:450px; border-top: hidden; border-bottom: hidden;">Listing Price: $ {{listitem.l_price}}</li>
+    </ul><hr>
+    {% if listitem.picture is None %}
+    <img src="https://cdn0.iconfinder.com/data/icons/technology-business-and-people/1000/file_light-15-512.png">
+    {% else %}
+    <img src={{listitem.picture}}></li>{% endif %}
+
+    <div class="jumbotron text-center" style="background-color: #ffffff;"><p class="lead">DESCRIPTION</p>
+    <p>{{listitem.description}}</p>
+    </div>
+
+    <div>
+        <li class="list-group-item list-group-item-warning">Current Bidder: <strong>{{listitem.c_bidder}}</strong>, bidding at <strong>$ {{listitem.c_price}}</strong></li>
+
+        {% if listitem.status|stringformat:"s" == "C" %}
+            <div class="alert alert-danger">BIDDING CLOSED  -----   {{listitem.c_bidder}} WINS THE BID @ $ {{listitem.c_price}}</div>
+        {% endif %}
+
+        {% if user.is_authenticated %}
+        {% if listitem.status|stringformat:"s" == "A" %}
+        <div class="jumbotron text-center">
+            {% if message %}<div class="alert alert-danger">{{message}}</div>{% endif %}
+            
+        <form action="LISTING" method="POST">
+            {% csrf_token %}
+            <input type="number" placeholder="Enter bid for listing" name="new_bid">
+            <input type="hidden" name="listing_name" value="{{listitem.title}}">
+            <button type="submit" class="btn btn-info">Enter New Bid</button>
+        </form>{% endif %}{% endif %}</div>
+    </div>
+    </ul>
+
+    <div style="margin:20px">{% if user.is_authenticated %}
+    {% if c_user|stringformat:"s" == listitem.username|stringformat:"s" %}
+    {% if listitem.status|stringformat:"s" == "A" %}
+        <form action="LISTING" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="listing_name" value="{{listitem.title}}">
+            <input type="hidden" name="status_change" value="C">
+            <button type="submit" class="btn btn-danger">Close Current Listing</button>
+        </form>{% endif %}{% endif %}{% endif %}</div>
+    
+    {% if user.is_authenticated %}
+    <form action="LISTING" method="POST">
+        {% csrf_token %}
+        <div class="text-center">
+            <input type="hidden" name="listing_name" value="{{listitem.title}}">
+            <button type="submit" class="btn btn-outline-primary" name="Todo" value="{{but_msg}}">{{but_msg}}</button>
+        </div>        
+    </form>{% endif %}
+    </div>
+
+    <div class="jumbotron" style="background-color: #FFFFF5;">
+        <h1 class="display-6 text-center">  Comments  </h1><hr>
+        {% if user.is_authenticated %}
+        <div class="form-group"><form action="LISTING" method="POST">
+            {% csrf_token %}
+            <textarea class="form-control" name="new_comment" placeholder="Add New Comment"></textarea>
+            <input type="hidden" name="listing_name" value="{{listitem.title}}">
+            <button class="form-control btn btn-outline-dark" style="border-left:hidden; border-right:hidden;" type="submit">Add Comment</button>
+        </form>{% endif %}</div>
+        <div class="list-group list-group-flush" style="margin:20px">
+        {% for cmt in comnts %}
+        <li class="list-group-item list-group-item-light" style="border-radius: 25px;"><p>{{cmt.comment}}</p> <p class="float-right">-- @ -- {{cmt.usern}}</p></li>{% endfor %}</div>
+        
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "encyclopedia/npl.html" %}
+
+{% block title %}
+    New Page
+{% endblock %}
+
+{% block body %}
+
+<h1>Create A New Page:</h1>
+<div>
+    <form method="POST" action="newpage.html">
+        {% csrf_token %}
+        <div>
+            <div>
+            <h3>Title:</h3>
+            <input type="text" name="title" autofocus>
+            </div>
+            <div style="height:25px;">
+                </div>
+            <div>
+                <h3>Content:</h3>
+            <textarea name="content" autocomplete="off" style="height:350px;">
+
+            </textarea>
+            </div>
+            <div style="height:25px;">
+            </div><input type="submit" value="SAVE NEW ENTRY">
+        </div>
+    </form>
+</div>
+{% endblock %}
