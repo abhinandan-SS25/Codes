@@ -1,0 +1,25 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+
+
+```{r}
+library(tidyverse)
+library(lubridate)
+source("../../scripts/viridis.R")
+co2 = read_table("../../data/co2_weekly_mlo.txt",na="-999.99",comment="#",
+                 col_names=c("year","month","day","year.decimal","ppm","n.days","yr-1-ago","yr-10-ago","increase.1800"))
+sea = read_csv("../../data/slr_sla_pac_keep_txj1j2_90.csv",skip=6,
+               col_names=c("year.decimal","TOPEX.Poseidon","Jason1","Jason2","Jason3"))
+
+head(co2)
+```
+
+```{r}
+head(sea)
+us_names = read_csv("../../data/names.csv")
+head(us_names)
+```

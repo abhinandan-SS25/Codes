@@ -1,0 +1,109 @@
+---
+title: "STAT 240 Discussion 9"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
+library(tidyverse)
+source("../../scripts/viridis.R")
+source("../../scripts/ggprob.R")
+```
+
+\newcommand{\E}{\mathsf{E}}
+\newcommand{\Var}{\mathsf{Var}}
+\renewcommand{\prob}{\mathsf{P}}
+
+## Problems
+
+The questions in this discussion assignment use the chimpanzee data set.
+In answering these questions, you may assume the following in models for the data:
+
+1. all trials are independent
+2. trials made with a partner have the same chance of being pro-social, even if the identities of the actors or partners differ.
+
+### Problem 1
+
+#### A
+
+Using the chimpanzee data,
+combine all of the trials made without a partner.
+Count the number of pro-social and selfish choices made.
+
+```{r}
+chimp = read.csv("../../data/chimpanzee.csv")
+
+chimp_c = chimp %>%
+  filter(partner != "none") %>%
+  summarise(prosocial_c = sum(prosocial), selfish_c = sum(selfish))
+```
+
+#### B
+
+Write a model for the number of pro-social choices.
+
+> It is a binomial model with n = 610, p = 0.588
+
+#### C
+
+Use the Agresti-Coull method to construct a 95% confidence interval for the probability that a chimpanzee makes the pro-social choice in experimental conditions when there is no partner present.
+
+```{r}
+binom_se =  function(n, p){
+  return ( sqrt( p*(1-p)/n) )
+}
+binom_ci = function(est, se, conf=0.95){
+  z = qnorm(1 - (1 - conf)/2)
+  me = z * se
+  ci = est + c(-1,1)*me
+  return(ci)
+}
+
+n = chimp_c$prosocial_c + chimp_c$selfish_c
+p = (chimp_c$prosocial_c + 2) / (n + 4)
+se = binom_se(n+4, p)
+
+ci_agresti = binom_ci(p, se)
+round(ci_agresti, 3)
+```
+
+#### D
+
+Interpret this confidence interval in the context of the experimental setting.
+
+> We are 95% certain that the probability that a chimp with no partner makes a pro-social choice is between p = 0.549 and 0.627
+
+### Problem 2
+
+Using the same data as in the previous problem,
+do the following.
+
+#### A
+
+State hypotheses for a two-sided hypothesis test that the probability that a chimpanzee makes the pro-social choice over the long run is equal to 0.5 versus the alternative that this probability is not 0.5.
+
+> H0 => p = 0.5
+  H1 => p != 0.5
+
+#### B
+
+Pick a test statistic, state the sampling distribution of this statistic if the null hypothesis is true,
+and compute a p-value for the test.
+
+```{r}
+
+```
+
+#### C
+
+Interpret these results in the context of the experiment following the examples from lecture notes.
+
+### 3
+
+Use functions from the file `ggprob.R` to visualize the calculation of the p-value by graphing an appropriate probability distribution and using differential coloring to indicate what in the plot corresponds to the p-value.
+Include a title and meaningful axis labels.
+
+```{r}
+
+```
+

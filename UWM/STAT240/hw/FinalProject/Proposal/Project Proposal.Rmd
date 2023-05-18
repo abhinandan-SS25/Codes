@@ -1,0 +1,70 @@
+---
+title: "Project Proposal"
+output: html_document
+date: "2023-04-08"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Group Members
+
+#### Discussion Group 5
+
+- Abhinandan Saha
+- Jingyi Bai
+- Lucas Holme
+- Tyler Bui
+
+## Communication Plan
+
+> We intend to comunicate remotely using Imessages sice all of our group members do not have Snapchat. This is where the bulk of planning is going to happen, including the university mail that we will use to share files and other stuff. Also, since the main deadlines are on Monday, we are planning to meet on the Saturdays at 6 in the evening before the deadlines so that all our works can be reviewed and any discussions and confusions addressed before submitting the required material.
+
+## Questions of Interest
+
+Currently these constitute our questions of Interest. These may be modified to some extent as we work towards our final submission for the Project 
+
+> Is the Greenhouse Gas Emission of the world really related to rising Sea Levels? what are the trends they show and what do they mean for our future?
+
+## Data Source
+
+> We intend to source our data from Kaggle.com and climatewatch.com. We are using two datasets which can be found on the following links:
+
+> For International Greenhouse Gas Emission
+https://www.climatewatchdata.org/data-explorer/historical-emissions?historical-emissions-data-sources=climate-watch&historical-emissions-gases=all-ghg&historical-emissions-regions=All%20Selected&historical-emissions-sectors=total-including-lucf%2Ctotal-including-lucf&page=1&sort_col=sector&sort_dir=ASC
+
+> For Sea Level
+https://www.kaggle.com/datasets/jarredpriester/global-sea-level-rise
+
+## Data Description
+
+> Ideally we would download the Dataset and use it with the Knitted document. But otherwise, for full reproducability we could use API calls to get the Data from the websites and parse them real time. 
+
+> The Internation Greenhouse Emission Dataset from climatewatch has the following variables: 
+
+- Country
+- Data Source (Not required)
+- Sector (Not required)
+- Gas (Not required)
+- Unit 
+- Years from 2019 to 1990
+
+> The table is in the long format. We will pivot it to the longer format and use it to analyse the trend of greenhouse emissions through the years, the total emission of the world through the years and so on. 
+Data Has information about 195 countries and as per our requirement we are looking for the years so 2019-1990. The number of columns are 30 and rows are 195. Also note that the unit for emission values every year is Metric ton of CO2.
+
+> The Sea Level Data from kaggle has the following variables: 
+
+- Year
+- Date(Not required)
+- mm (This is relative to the averge sea level between 1993 to 2008)
+
+> The table will be used to analyse and show the trend and overall correlation (if there exists one) between GreenHouse Emission and Sea Level through the years. The number of columns are 2 and rows are 140 (1880 - 2020).
+
+## Graph
+
+> A key graph will overlay the trend and overall change of Green house emissions and sea levels to answer if they are correlated and how they have changed historically and how they can probably changed in the future.
+
+## Methods
+
+> The methods in use would be to pivot the greenhouse emission table to the long form, mutate and join the two datasets. Then use ggplot and so on to visualize the data and draw analysis on them and use regression to predict the trnds of the data in coming times.

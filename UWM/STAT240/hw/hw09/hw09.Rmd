@@ -1,0 +1,258 @@
+---
+author: "Abhinandan Saha"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE,
+                      warning = FALSE, error = TRUE, fig.height = 3)
+library(tidyverse)
+library(kableExtra)
+library(broman)
+source("../../scripts/viridis.R")
+source("../../scripts/ggprob.R")
+theme_set(theme_minimal())
+```
+
+\newcommand{\E}{\mathsf{E}}
+\newcommand{\Var}{\mathsf{Var}}
+\newcommand{\SD}{\mathsf{SD}}
+\renewcommand{\prob}{\mathsf{P}}
+
+## Assignment 9
+
+#### Due Friday, April 14, 11:59 PM CT
+
+### Preliminaries
+
+- Directories
+    - COURSE/homework/
+    - COURSE/homework/hw09/
+    - COURSE/data/
+    - COURSE/scripts/
+- Files
+  - COURSE/homework/hw09/hw09.Rmd
+  - COURSE/data/chimpanzees.csv
+  - COURSE/scripts/viridis.R
+  - COURSE/scripts/ggprob.R
+
+### Data
+
+- The data are in the file `chimpanzee.csv`.    
+- These data are artificial, but created to match details from a 2011 PNAS paper on chimpanzee prosocial choice.  
+- See the [Course Notes and Case Studies Chapter 18](https://bookdown.org/bret_larget/stat-240-case-studies/chimpanzees-and-prosocial-choice.html) for background on the data.
+
+### Aims
+
+- Practice inference on proportions
+
+## Problems
+
+  1. This problem uses the chimpanzee prosocial experiment data we have been using in lecture. For this problem, we will:
+  
+- Consider only those trials with a partner.
+- Make an assumption that there is a universal $p_{\text{partner}}$ representing the probability any chimpanzee would make a prosocial choice in a single trial under the experimental conditions we have been examining.  
+- Assume that all trials are independent.
+
+Do the following:
+
+- Read in the `chimpanzee.csv` data file.  
+- Create a summary table with:
+  - one row for all trials with a partner and one row for all trials without a partner;
+  - a column `prosocial` with the combined number of prosocial choices made (separate values for with and without a partner);
+  - a column `selfish` for the number of selfish choices made;
+  - a column `n` with the combined number of trials (values should be 610 and 180); 
+  - a column `p_prosocial` with the proportion of prosocial choices made.
+- Print the entire table
+
+```{r}
+chimpanzee = read.csv("../../data/chimpanzee.csv")
+
+chimpanzee["partner_exists"] = chimpanzee$partner != "none"
+
+chimp_summary = chimpanzee %>%
+  group_by(partner_exists) %>%
+  summarize(prosocial = sum(prosocial), selfish = sum(selfish), n = prosocial + selfish, p_prosocial = prosocial / n)
+
+chimp_summary %>% print()
+```
+
+
+ 2. Define $p_1 = p_{\text{partner}}$ and $p_2 = p_{\text{no partner}}$ to be the long-run probabilities that chimpanzees make the prosocial choices with and without a partner, respectively, in the experimental conditions. (*You can decide which subscripts to use*.) Note that these parameter definitions implicitly assume that all trials are independent and that the identities of the chimpanzees and their partners do not affect the prosocial trial probabilities. These assumptions could and should be examined, but complete these problems as if the assumptions are accurate.
+
+- Write a statistical model for the data, $X_1$ and $X_2$, the number of pro-social choices under the two conditions. (It may be helpful to copy and edit LaTeX syntax from the lecture notes if you want to make the knitted document look pretty, but plain text is also fine.)
+
+> X1 ∣ p1 ∼ Binomial(610,p1)
+
+> X2 ∣ p2 ∼ Binomial(180,p2)
+
+- Use the data summary in Problem 1 to construct a 95% confidence interval for  $p_{\text{partner}} - p_{\text{no partner}}$ (or $p_1 - p_2$), using the Agresti-Coffe method for confidence intervals for differences in proportions.
+
+```{r}
+
+n1 = 610
+n2 = 180
+n1_1 = n1 + 2
+n2_1 = n2 + 2
+
+p1_1 = ((0.589 * n1) + 1)/ (n1_1 + 2)
+p2_1 = ((0.461 * n2) + 1)/ (n2_1 + 2)
+
+se = sqrt((p1_1*(1-p1_1))/n1_1 + (p2_1*(1-p2_1))/n2_1)
+error = 1.96 * se
+
+lower = (p1_1 - p2_1) - error
+upper = (p1_1 - p2_1) + error
+```
+
+- Interpret this confidence interval in context, following model language in lecture notes.
+
+> We are 95% confident that difference in long-run probabilites that chimpanzee C make the pro-social choice with and without a partner is between 4.8% lower to 21.2% higher without a partner.
+
+  3. Using data and parameters definitions from previous problems, test the hypothesis that $p_1 = p_{\text{partner}} = 0.5$ versus the two-sided alternative.
+
+- State null and alternative hypotheses.
+- Write the statistical model for $X_1$, the number of pro-social choices.
+- State the sampling distribution of $X_1$ if the null hypothesis is true.
+- Which possible outcomes of $X_1$ have evidence against the null hypotheses at least as strong as the observed data, $x_1 = 359$?
+- Calculate and report a p-value.
+- Following style from lecture examples, write an interpretation of the results in context without statistical jargon, summarizing the statistical evidence to support your conclusions in a short phrase within a pair of parentheses.
+
+> H0 = p = 0.5 (null hypothesis)
+
+> H1 = p != 0.5 (alternate hypothesis)
+
+> X1 ∣ p1 ∼ Binomial(610,p1)
+
+> If null hypothesis is true: X ~ Binomial(610, 0.5)
+
+```{r}
+p_610 = dbinom(359, 610, 0.5)
+tibble(
+     x = 0:610,
+     prob = dbinom(x, 610, 0.5)) %>% 
+     filter(near(prob, p_610)) 
+```
+> Outcomes that are less than 251 or greater than 359 for X1, have evidence agianst the null hypothesis at least as strong as the observed data.
+
+```{r}
+pbinom(251, 610, 0.5) + (1 - pbinom(358, 610, 0.5))
+```
+> p-value = 1.405895e-05
+
+> In conclusion, the p-value is very small and thus an observed value with the current parameters is very unprobable. Thus the null hypothesis is likely false. There is strong evidence (p=1.405895e-05, two-sided binomial test) that the chimpanzee in this experiment will make the willful choices meaning they were not at random.
+
+
+  4. For the previous problem, create a graph that shows the sampling distribution of $X_1$ under the null hypothesis and indicates (with different colors and/or lines) how the p-value relates to the graph.
+
+
+```{r}
+gbinom(610, 0.5, scale=TRUE) + 
+  geom_vline(xintercept=c(359, 251), color="red",
+             linetype="dashed") 
+```
+
+
+
+
+
+
+  5. Repeat Problem 3, but use the data for all trials **without a partner** for an assumed universal parameter $p_2 = p_{\text{no partner}}$, using a statistical model for $X_2$, the total number of prosocial choices made without a partner present in the experiment.
+
+> H0 = p = 0.5 (null hypothesis)
+
+> H1 = p != 0.5 (alternate hypothesis)
+
+> X2 ∣ p2 ∼ Binomial(180,p2)
+
+> If null hypothesis is true: X ~ Binomial(180, 0.5)
+
+```{r}
+p_359 = dbinom(83, 180, 0.5)
+tibble(
+     x = 0:180,
+     prob = dbinom(x, 180, 0.5)) %>% 
+     filter(near(prob, p_359)) 
+```
+> Outcomes that are less than 83 or greater than 97 for X2, have evidence agianst the null hypothesis at least as strong as the observed data.
+
+```{r}
+pbinom(83, 180, 0.5) + (1 - pbinom(96, 180, 0.5))
+```
+> p-value = 0.3325791
+
+> In conclusion, the p-value is very high and thus an observed value with the current parameters is very probable. Thus the null hypothesis is likely. There is strong evidence (p=0.3325791, two-sided binomial test) that the chimpanzee in this experiment is likely to make the pro-social as much the selfish choice in the long run under similar experimental conditions without partner. This means that the choice is random.
+
+
+  6. The previous statistical inferences assume a binomial model for the observed number of prosocial choices for trials with and without a partner.
+
+State one criticism where reality may differ from the assumptions, possibly leading to misleading conclusions.
+(What is an example of an assumption of the binomial model which, in the given context, is questionable?)
+
+> We have assumed that the choices are independent for each trial. But in reality, one trial may affect the other thus making the choices not independent in nature, which also changes the probability of success or failure on each trial which is another assumption of the binomial model.
+
+
+
+  7. In a poll from the 2022 election for governor in Wisconsin,
+326 out of 679 likely voters responded that they would vote for the incumbent Tony Evers.
+Using the Agresti-Coull method, find a 95% confidence interval for the proportion of likely voters in Wisconsin who voted vote for Tony Evers in the November 8 election.
+
+```{r}
+binom_se =  function(n, p){
+  return ( sqrt( p*(1-p)/n) )
+}
+binom_ci = function(est, se, conf=0.95){
+  z = qnorm(1 - (1 - conf)/2)
+  me = z * se
+  ci = est + c(-1,1)*me
+  return(ci)
+}
+
+n = 679
+p = (326 + 2) / (n + 4)
+se = binom_se(n+4, p)
+
+ci_agresti = binom_ci(p, se)
+round(ci_agresti, 3)
+```
+
+Interpret the confidence interval in context.
+
+> We are 95% confident that in long-run probabilites that the election is rerun again and again, Tony Evers will recieve a vote proportion between 44.3% and 51.8%.
+
+
+  8. In a psychological experiment,
+a reported psychic tries to guess the suit of the cards of a well-shuffled stack of cards which includes many decks shuffled together.
+You may assume that the suit of each card in order is equally likely to be any one of the four suits and that the suits of the cards are independent of each other.
+
+In guesses of the suits of 100 cards, the psychic correctly guesses the suit 29 times.
+Conduct a formal hypothesis test to examine the evidence that the psychic can guess the suit of the cards more often than expected.
+State a model, declare a test statistic, state hypotheses,
+calculate a one-sided p-value,
+and report the results in the context of the problem following the format presented in lecture notes.
+
+> We set the null hypothesis to p = 0.5. This means the guesses are completely random. This shows that the psychic does not in fact guess more than expected.
+
+>  H0 = p = 0.29 (null hypothesis)
+
+>  H1 = p > 0.29 (alternate hypothesis)
+
+> X ∣ p ∼ Binomial(100,p)
+
+> If null hypothesis is true: X ~ Binomial(100, 0.29)
+
+```{r}
+p_ = dbinom(29, 100, 0.29)
+tibble(
+     x = 0:100,
+     prob = dbinom(x, 100, 0.29)) %>% 
+     filter(near(prob, p_)) 
+```
+> Outcomes that are greater than or equal to 29, have evidence agianst the null hypothesis at least as strong as the observed data.
+
+```{r}
+1 - pbinom(28, 100, 0.29)
+```
+> p-value = 0.537742
+
+> In conclusion, the p-value is very high and thus an observed value with the current parameters is very probable. Thus the null hypothesis is very likely. There is strong evidence (p=0.537742, two-sided binomial test) that the reported psychic is making choices that are random. This means that there is no evidence that the psychic can guess the suit of cards more than expected.

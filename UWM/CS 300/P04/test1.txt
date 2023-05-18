@@ -1,0 +1,9 @@
+Total number of patients: 4
+Total number seen: 4
+RED: 1
+YELLOW: 2
+GREEN: 1
+28501: 85M (RED)
+20503: 5M (YELLOW)
+11504: 15F (YELLOW)
+35502: 55X (GREEN)

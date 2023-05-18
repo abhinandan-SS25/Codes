@@ -1,0 +1,11 @@
+import processing.core.PApplet; 
+
+public class BasketBall extends Thing implements Clickable{
+  float rotation;
+  private int rotations;
+  
+  public Basketball(float x, float y) {
+    super(x, y, "basketball.png");
+    rotation = PApplet.PI/2;
+  }
+}

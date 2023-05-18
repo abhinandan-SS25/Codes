@@ -1,0 +1,327 @@
+---
+title: "Midterm - Part 2"
+output: html_document
+author: "Abhinandan Saha"
+---
+
+<style>#header{margin-bottom:30px}div.level2{margin:40px 0 80px}div.level3{margin:40px 0 60px}h3{margin-bottom:20px}</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE,message=FALSE,warning=FALSE,error=TRUE,
+                      fig.width=6,fig.height=6,fig.align='center')
+library(tidyverse)
+library(lubridate)
+
+# force more digits to be printed
+options(pillar.sigfig=7,width=100)
+```
+
+
+**Important notes:**
+
+ - Remember you can use any and all notes, files, videos, and cheat sheets presented in class or found on Canvas (for the tidyverse cheat sheets, you may find them using the internet). You may also reference R documentation manuals for any function. However, you may NOT search for other help online or discuss exam materials with anyone.
+ - All plots MUST include proper titles, labels, etc. for full credit!
+ - Please **KNIT as you go along and CHECK YOUR OUTPUT to ensure there are no errors**! We have added `error=TRUE` as a default argument in the setup chunk above (line 9 in the Rmd) which will allow the document to knit even if there are errors (so that you can still submit an HTML file in the end for us to grade). Files with errors in the knitted output may be penalized!
+ - Also make sure you do NOT delete the blank lines around section headers (e.g. the ## Question x and ### Part x lines). Deleting the extra lines may cause R to knit document sections incorrectly, and we use these sections to help navigate through your exams. If they are messed up, it could make it more likely for us to accidentally miscalculate your score.
+ - ***If you have any questions, please email the instructor and also CC your TA***.
+
+
+
+
+## Question 1   <small>(32 pts total)</small>
+
+
+
+For this first question, we will examine historic atmospheric CO2 and sea level rise data gathered from NOAA.
+
+As the amount of CO2 in the atmosphere rises, increasing glacial melt and surface water temperature has led to unprecedented levels of sea level rise, which is a major environmental and safety concern for coastal cities and populations.
+
+The chunk below loads in the two datasets we will use (`co2_weekly_mlo.txt` and `slr_sla_pac_free_txj1j2_90.csv`) directly from the NOAA data repository and performs some basic data parsing like separating out comments, correcting NA values, and setting column names.
+
+If this chunk is not working for you for some reason, you can always download the [co2_weekly_mlo.txt](https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_weekly_mlo.txt) and [slr_sla_pac_free_txj1j2_90.csv](https://www.star.nesdis.noaa.gov/socd/lsa/SeaLevelRise/slr/slr_sla_pac_keep_txj1j2_90.csv) files separately (or from canvas), then change the path below to point to your local file instead.
+
+
+```{r}
+co2 = read_table("https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_weekly_mlo.txt",na="-999.99",comment="#",
+                 col_names=c("year","month","day","year.decimal","ppm","n.days","yr-1-ago","yr-10-ago","increase.1800"))
+sea = read_csv("https://www.star.nesdis.noaa.gov/socd/lsa/SeaLevelRise/slr/slr_sla_pac_keep_txj1j2_90.csv",skip=6,
+               col_names=c("year.decimal","TOPEX.Poseidon","Jason1","Jason2","Jason3"))
+
+head(co2)
+head(sea)
+```
+
+
+From the `co2` dataset, we mainly care about the `ppm` column, which measure the amount of CO2 in the atmosphere in units of parts per million (i.e. number of CO2 particles in each million particles). From the `sea` dataset, we mainly care about the `TOPEX.Poseidon`, `Jason1`, `Jason2`, and `Jason3` columns, which contains estimated mean sea level height in millimeters as estimated by three different orbiting satellite altimeters.
+
+Each dataset also contains a `year.decimal` column which gives the date in the form of a decimal year, as a fraction of how far into the year that date is.
+
+
+
+
+
+
+### Part 1A   <small>(1pt for each subpart, 1pt for printing each df, 10pts total)</small>
+
+
+
+For each data frame, perform the following operations **in order**:
+
+- `co2`:
+  1. Remove missing values in `ppm`.
+  2. Create a date column called `date`.
+     i. First use `str_c(year,month,day,sep="-")` inside a mutate to combine the separate `year`, `month`, and `day` columns into a single date string.
+     ii. Then, use an appropriate lubridate date parsing function to turn this into an actual date column.
+  3. Change `month` to use an abbreviated name format (i.e. "Jan", "Feb", ...).
+     - If you are getting month names in a different language than English, add `Sys.setlocale("LC_ALL","English")` to the top of your Rmd file (remember to run it as well) and try again.
+  4. Select only the following columns to keep: `date`, `year.decimal`, `year`, `month`, `ppm`.
+
+- `sea` :
+  1. Create a date column called `date`. Use `as_date(date_decimal(year.decimal))` inside a mutate. We haven't covered this functions before, but `date_decimal` converts a decimal date to a datetime object, and `as_date` discards the time component and returns just a simple date object.
+  2. Similar to above, create a `year` column and a `month` column that uses an abbreviated name format (i.e. "Jan", "Feb", ...).
+  3. Put the data into a tidy format by pivoting the TOPEX and all three Jason columns so that we have two new columns: `method` and `mm` for the measurement method and measured sea level using that method (if it was in use) in mm, like this:
+     ```
+     year.decimal method          mm
+         1992.961 TOPEX.Poseidon -14.87
+         1992.961 Jason1          NA   
+         1992.961 Jason2          NA   
+         1992.961 Jason3          NA   
+         1992.986 TOPEX.Poseidon -27.17
+         1992.986 Jason1          NA   
+         1992.986 Jason2          NA   
+         1992.986 Jason3          NA   
+         ...      ...             ...     
+     ```
+  4. Drop any rows with missing `mm` values.
+
+Finally, use `print()` to **print the first 10 rows of each data frame**. Make sure you do this only AFTER processing your file, i.e. do NOT accidentally overwrite your processed data file with the `print()` function, or you would throw away all the other rows in your data frame.
+
+Printing your data frame helps us check your work and assign grades more efficiently. **Failure to print when asked may result in loss of points!**
+
+
+```{r}
+co2 = co2 %>%
+  drop_na(ppm) %>%
+  mutate(date = ymd(str_c(year,month,day,sep="-")), month = month(date, label=TRUE)) %>%
+  select(date, year.decimal, year, month, ppm)
+
+sea = sea %>%
+  mutate(date = as_date(date_decimal(year.decimal)), year = year(date), month = month(date, label=TRUE)) %>%
+  pivot_longer(names_to = "method", values_to="mm", cols = c(Jason1, Jason2, Jason3, TOPEX.Poseidon)) %>%
+  drop_na(mm)
+
+co2 %>%
+  print(n=10)
+
+sea %>%
+  print(n=10)
+
+```
+
+
+
+
+
+### Part 1B   <small>(1pt each for counting, tabulating, printing of each df, 6pts total)</small>
+
+
+
+Let's check the consistency of the data. If there are years with large portions of missing data, it may result in less accurate summaries later on (especially if there are strong seasonal effects).
+
+**For EACH of the two data frames**, count how many observations there are in each combination of year AND month (e.g. groups would be like Feb 2023, Jan 2023, Dec 2022, Nov 2022, ..., Jan 2022, Dec 2021, ..., Jan 2021, ......... etc.)
+
+Display this info in a table with year on the rows and month on the columns. (Hint: this process involves making the data ***wider*** 😉 ; you can also make sure the months are sorted correctly in the columns by adding the argument `names_sort=TRUE`).
+
+Again, make sure you **do this for BOTH data frames**. Then, **print ALL rows** of the output (you can do this by using `print()` with the `n=Inf` argument).
+
+
+```{r}
+no_data_co2 = co2 %>%
+  group_by(year, month) %>%
+  summarize(n=n())
+no_data_sea = sea %>%
+  group_by(year, month) %>%
+  summarize(n=n())
+
+co2_data = no_data_co2 %>%
+  pivot_wider(names_from = month, values_from = n, names_sort=TRUE)
+sea_data = no_data_sea %>%
+  pivot_wider(names_from = month, values_from = n, names_sort=TRUE)
+
+co2_data %>%
+  print(n=Inf)
+sea_data %>%
+  print(n=Inf)
+```
+
+
+
+
+
+### Part 1C   <small>(1pt each for filtering, plotting, labels, and description, 8pts total)</small>
+
+
+
+If you did the previous part correctly, you should've seen that for `co2`, the years 1974, 1975, and 2023 have partially incomplete data that may negatively impact the dataset (especially since we expect seasonal effects in the dataset). Similarly, for `sea`, the years 1992 and 2022 also have incomplete data. Remove these years from the datasets.
+
+Then, **for each dataset**, make a **black line plot** (i.e. `geom_line()`) with a **blue smoothed trend curve** (i.e. `geom_smooth()`) overlaid on top (remember to add `se=FALSE` to turn off the shaded region), with time on the horizontal axis and the variable of interest (either `ppm` or `mm`) on the vertical axis. For time, you may use either the date object or the year decimal column.
+
+Each dataset should have its own separate plot (i.e. there should be 2 plots in total, each one with a line and smoothed curve). Also remember to add a nice, descriptive title and proper axes labels for full points!
+
+Finally, briefly write 1-2 sentences describing anything interesting you notice in the plots.
+
+
+```{r}
+co2 = co2 %>%
+  filter(year != 1974 & year != 1975 & year != 2023)
+
+sea = sea %>%
+  filter(year != 2022 & year != 1992)
+
+ggplot(co2, aes(x=date, y=ppm)) +
+  geom_line() + 
+  geom_smooth(se=FALSE) +
+  xlab("Year") +
+  ylab("Concentration of CO2 (ppm)") +
+  ggtitle("Relationship between Concentration of CO2 in the atmosphere(ppm) and time")
+ggplot(sea, aes(x=date, y=mm)) +
+  geom_line() + 
+  geom_smooth(se=FALSE) +
+  xlab("Year") +
+  ylab("Sea Level (mm)") +
+  ggtitle("Relationship between Sea Level(mm) and time")
+```
+
+
+> An interesting thing about both the plots would be that although both show an overall increasing trend throguhout the years, they also display a periodic pattern of rising and falling which might be attributed as seasonal changes. It can also be noted that although the sea levels have risen with the increases in CO2 concentration in the atmosphere, CO2 shows almost a constant overall trend of growth, whereas, sea levels have risen with varying rates, slowing down considerably around 2005-2010, increasing rapidly from then on with varying rate of growths through the 2012-2015 and 2015-2023 periods.
+
+
+
+### Part 1D   <small>(1pt each for summarizing, joining, plotting, and description, 8pts total)</small>
+
+
+
+As you can see, there are some seasonality effects in both datasets. In order to remove this, **average each dataset** to get the mean CO2 and sea level measurements **for each year**. Combine these two datasets using a join function, keeping only rows that appear in BOTH datasets. Then, make one final scatter plot with `mm` on the vertical axis and `ppm` on the horizontal axis. Overlay a blue smoothed trend curve here as well.
+
+Again, remember to add titles/labels. Comment on this plot: what do you observe? If you observe a correlation, does this imply a causal relationship?
+
+
+```{r}
+co2_avg = co2 %>%
+  group_by(year) %>%
+  summarize(avg_ppm = mean(ppm))
+
+sea_avg = sea %>%
+  group_by(year) %>%
+  summarize(avg_mm = mean(mm))
+
+joined_data = inner_join(co2_avg, sea_avg)
+
+ggplot(joined_data, aes(x=avg_mm, y=avg_ppm)) +
+  geom_point() +
+  geom_smooth(se=FALSE) +
+  xlab("Sea Level (mm)") +
+  ylab("Concentration of CO2 (ppm)") +
+  ggtitle("Relation between Concentration of CO2 and Sea Level by years")
+```
+
+> We observe that the overall trend suggests that as the concentration of CO2 has risen every year,the sea level has risen correspondingly evry year. This suggests a strong positive correlation between the increase in CO2 levels and the sea level.
+
+
+
+
+
+## Question 2   <small>(18 pts total)</small>
+
+For this next question, we will be working with baby name popularity data gathered from the Social Security Administration's social security number application forms.
+
+Once again the chunk below should automatically import the data for you, but if you are having troubles with it, you can always download the [names.csv](https://pages.stat.wisc.edu/~bwu62/names.csv) file manually (or from canvas instead).
+
+
+```{r}
+names = read_csv("https://pages.stat.wisc.edu/~bwu62/names.csv")
+```
+
+
+
+
+### Part 2A   <small>(6pts)</small>
+
+
+
+Let's start by computing a few useful columns we will need in later steps. Add the following:
+
+  - `prop.by.year.sex` : For each name, this column should give the **proportion of people** in the dataset of **the same year and sex** that have that name (e.g. in 2021, Olivia was registered as a female baby name 17,728 times, out of a total of 1.63 million female babies that were registered in 2021 according to this dataset, so Olivia in 2021 should have a proportion of 0.0109; if you group by year and sex and sum this column, each row should add up to 1.)
+  - `total.by.name.sex` : For each name, this column should give the **TOTAL number of babies** registered with the **same name AND sex across ALL years** (e.g. if we look at all female Olivias (yes, there are some Olivias registered as males in the dataset, likely due to accounting error), and sum the frequencies, you should find there are a total of 506,641 female Olivias registered across all years.)
+
+
+```{r}
+names = names %>%
+  group_by(year, sex) %>%
+  mutate(sex_pop = sum(frequency)) %>%
+  group_by(year, sex, name) %>%
+  mutate(prop.by.year.sex = sum(frequency)/sex_pop) %>%
+  ungroup() %>%
+  group_by(sex, name) %>%
+  mutate(total.by.name.sex = sum(frequency))
+```
+
+
+
+
+### Part 2B   <small>(6pts)</small>
+
+
+
+Now, we will start exploring the data more. Let's begin by examining the most popular names. For each year and sex, find the most popular name by frequency, then display these in a long table with each year on a SINGLE row in descending order (i.e. most recent year at the TOP), and a column each for F and M, showing for each year and sex what the most popular name is. Print the ENTIRE table using `print()` with the `n=Inf` argument.
+
+
+```{r}
+req = names %>%
+  group_by(year, sex) %>%
+  slice_max(n=1, order_by = frequency) %>%
+  select(year, sex, name) %>%
+  pivot_wider(names_from = sex, values_from = name) %>%
+  arrange(desc(year))
+
+req %>%
+  print(n=Inf)
+```
+
+
+
+
+
+
+### Part 2C   <small>(6pts)</small>
+
+
+
+Let's look more closely at these names that were identified in the previous part as some of the most popular.
+
+Using the data frame you created in 2A, filter out only rows that satisfy the following conditions:
+
+  - The name AND sex is a combination that appears as a top name/sex combination from SOME year in 2B (e.g. Olivia, F is a combination you want, since it was the most popular female name from 2019-2021, but you do NOT want the couple dozen people who were misclassfied as male Olivias, since that is not a combination that was a most popular male name in any year).
+  - The name is one of the top 8 most popular in that sex by total frequency across all years (you already have this in the `total.by.name.sex` column).
+
+Your final data frame should only have 8 male and 8 female names (the top 8 over all years) and these should all be names that appeared somewhere in 2B.
+
+Now, as a final step, plot this in a series of subplots, showing year on the horizontal axis, proportion on the vertical axis, and having a facet for each name, organized in rows by sex. (Hint: assuming you did the previous steps correctly, you can easily create this facet by adding ` + facet_wrap(sex~name,ncol=4)` as a layer)
+
+
+```{r,fig.width=10,fig.height=10}
+req2 = req %>%
+  pivot_longer(names_to = "Gender", cols = c(F, M))
+
+q = names %>%
+  semi_join(req2, by=c("name"="value", "sex"="Gender"))
+
+ggplot(q, aes(x=year, y=prop.by.year.sex)) +
+  geom_col() +
+  facet_wrap(sex~name,ncol=4) +
+  xlab("Year") +
+  ylab("Proportion of name by Sex") +
+  ggtitle("Rpoportion of name ")
+```
+
+

@@ -1,0 +1,35 @@
+import processing.core.PApplet; 
+
+public class Basketball extends Thing implements Clickable{
+  float rotation;
+  private int rotations;
+  
+  public Basketball(float x, float y) {
+    super(x, y, "basketball.png");
+    rotation = PApplet.PI/2;
+  }
+  
+  @Override
+  public void draw() {
+    processing.pushMatrix();
+    processing.translate(x, y);
+    processing.rotate(this.rotations * rotation);
+    processing.image(image(), 0.0f, 0.0f);
+    processing.popMatrix();
+  }
+  
+  @Override
+  public void mousePressed() {
+    if (this.isMouseOver()) {
+      this.rotate();
+    }
+  }
+  
+  @Override
+  public void mouseReleased() {
+  }
+  
+  public void rotate() {
+    this.rotations++;
+  }
+}

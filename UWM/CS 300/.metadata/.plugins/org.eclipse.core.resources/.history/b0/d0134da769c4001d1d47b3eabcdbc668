@@ -1,0 +1,167 @@
+import processing.core.PApplet;
+import processing.core.PImage;
+import java.util.Random;
+import p3src.Badger;
+import p3src.StarshipRobot1;
+import java.io.File;
+import java.util.ArrayList;
+
+
+public class DancingBadgers extends PApplet {
+  private static DanceStep[] badgersDanceSteps = new DanceStep[] {DanceStep.LEFT, DanceStep.RIGHT,
+      DanceStep.RIGHT, DanceStep.LEFT, DanceStep.DOWN, DanceStep.LEFT, DanceStep.RIGHT,
+      DanceStep.RIGHT, DanceStep.LEFT, DanceStep.UP}; // array storing badgers dance show steps
+  private static float[][] startDancePositions =
+      new float[][] {{300, 250}, {364, 250}, {428, 250}, {492, 250}, {556, 250}}; // array storing the positions of the dancing badgers at the start of the dance show
+  private static PImage backgroundImage; //background image
+  private static int badgersCountMax; //Maximum number of Badger objects allowed in the basketball court
+  private boolean danceShowOn; //Tells whether the dance show is on.
+  private static Random randGen; //Generator of random numbers
+  private static ArrayList<Thing> things; //arraylist storing Thing objects
+
+  /**
+   * Sets the size of the display window of this graphic application
+   */
+  @Override
+  public void settings() {
+    this.size(800, 600);
+  }
+
+  /**
+   * Defines initial environment properties of this graphic application. This method initializes all
+   * the data fields defined in this class.
+   */
+  @Override
+  public void setup() {
+    Thing.setProcessing(this);
+    Badger.setProcessing(this);
+    
+    //Initial Setup
+    Random randgen = new Random();
+    badgersCountMax = 5;
+    backgroundImage = this.loadImage("images" + File.separator + "background.png"); //loading the background image
+    things = new ArrayList<>();
+    
+    things.add(new Thing(50, 50, "target.png"));
+    things.add(new Thing(750, 550, "target.png"));
+    things.add(new Thing(750, 50, "shoppingCounter.png"));
+    things.add(new Thing(50, 550, "shoppingCounter.png"));
+    things.add(new StarshipRobot(things.get(0), things.get(2), 3));
+    things.add(new StarshipRobot (things.get(1), things.get(3), 5));
+    
+    this.getSurface().setTitle("P5 Dancing Badgers"); // displays the title of the screen
+    this.textAlign(3, 3); // sets the alignment of the text
+    this.imageMode(3); // interprets the x and y position of an image to its center
+    this.focused = true; // confirms that this screen is "focused", meaning
+    // it is active and will accept mouse and keyboard input.
+    // TODO complete the implementation of this method
+  }
+  
+  @Override
+  public void draw() {
+    this.background(this.color(255, 218, 185));
+    this.image(backgroundImage, this.width / 2, this.height / 2);
+    
+    for (int i = 0; i < things.size(); i++)
+      things.get(i).draw();
+  }
+  
+  @Override
+  public void mousePressed() {
+    for (int i = 0; i < things.size(); i++) {
+      Thing thingObject = things.get(i);
+      if (thingObject instanceof Clickable && thingObject.isMouseOver()) {
+        thingObject.processing.mousePressed();
+        return;
+      }
+    }
+  }
+  
+  @Override
+  public void mouseReleased() {
+    for (int i = 0; i < things.size(); i++) {
+      Thing thingObject = things.get(i);
+      if (thingObject instanceof Clickable) {
+        thingObject.processing.mouseReleased();
+        return;
+      }
+    }
+  }
+  
+  public int badgersCount() {
+    int count = 0;
+    for (int i = 0; i < things.size(); i++) {
+      if (things.get(i) instanceof Badger) {
+        count++;
+      }
+    }
+    return count;
+  }
+  
+  private void setStartDancePositions() {
+    int dancePosition = 0;
+    for (int i = 0; i < things.size(); i++) {
+      if (things.get(i) instanceof Badger) {
+        Badger badgerObject = (Badger) things.get(i);
+        badgerObject.x = startDancePositions[dancePosition][0];
+        badgerObject.y = startDancePositions[dancePosition][1];
+        dancePosition++;
+      }
+    }
+  }
+  
+  @Override
+  public void keyPressed() {
+    switch (Character.toUpperCase(this.key)) {
+      case 'B': // add new badgers as long as the maximum numbers of badgers allowed to be
+                // present in the field is not reached
+        if (badgersCount() < badgersCountMax && !danceShowOn) {
+          things
+              .add(new Badger(randGen.nextInt(this.width), randGen.nextInt(this.height), badgersDanceSteps));
+        }
+        break;
+      case 'C':
+        danceShowOn = false;
+        for (int i = 0; i < things.size(); i++) {
+          while (things.get(i) instanceof MovingThing) {
+            things.remove(i);
+          }
+        }
+        break;
+      case 'D': 
+        if (badgersCount() > 0 && !danceShowOn) {
+          danceShowOn = true;
+          this.setStartDancePositions();
+          for (int i = 0; i < things.size(); i++) {
+            if (things.get(i) instanceof Badger) {
+              Badger badgerObject = (Badger)things.get(i);
+              badgerObject.startDancing();
+            }
+          }
+        }
+      case 'R': // delete the badger being pressed
+        if (!danceShowOn) {
+          for (int i = 0; i < things.size(); i++) {
+            if (things.get(i).isMouseOver() && things.get(i) instanceof Badger) {
+              things.remove(i);
+              break;
+            }
+          }
+        }
+        break;
+      case 'S':
+        danceShowOn = false;
+        for (int i = 0; i < things.size(); i++) {
+          if (things.get(i) instanceof Badger) {
+            Badger badgerObject = (Badger)things.get(i);
+            badgerObject.stopDancing();
+          }
+        }
+    }
+  }
+
+  public static void main(String args[]) {
+    PApplet.main("DancingBadgers");
+  }
+ 
+}

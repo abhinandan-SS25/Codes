@@ -1,0 +1,143 @@
+---
+title: "STAT 240 Discussion 7"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
+library(tidyverse)
+source("../../scripts/viridis.R")
+source("../../scripts/ggprob.R")
+```
+
+
+## Group XXX (use the assigned group name/number)
+
+## Members Present
+
+- ADD THE NAMES OF EVERYONE PRESENT
+- MAKE THE NAME **BOLD** OF THE RESPONSIBLE PERSON TO UPLOAD THE FILES FOR THE GROUP
+
+## Members Absent
+
+- ADD NAMES OF ANY ABSENT MEMBERS
+
+
+## Questions
+
+### 1
+
+For each scenario, explain why the random variable does *not* have a binomial distribution.
+
+1. A bucket contains 10 colored tokens with five that are red and five that are blue. Four tokens are drawn at random from the bucket one at a time, but without replacing the tokens drawn. $X_1$ is the number of red tokens selected.
+
+2. A fair coin is tossed repeatedly until the tenth head is tossed. $X_2$ is the number of tails tossed prior to the tenth head.
+
+3. Four buckets each contain a total of five tokens each, some red and some blue. The number of red tokens in the buckets are 1, 2, 3, and 4 with blue tokens making up the remainder. One token is drawn at random from each bucket. $X_3$ is the total number of red tokens drawn.
+
+
+### 2
+
+Let $X \sim \operatorname{Binomial}(25,0.4)$.
+
+#### A
+
+Calculate and report the mean $\mu=\mathrm{E}(X)$ and the standad deviation $\sigma=\sqrt{\operatorname{Var}(X)}$
+
+
+#### B
+
+Calculate $\text{P}(X \geq 14)$
+
+
+#### C
+
+Create a graph of the $\operatorname{Binomial}(25,0.4)$ distribution. Color the segments for $x=14,15,...,25$ red and use gray for the rest. Plot using `theme_minimal()`.
+
+You may edit the code in this block which does something similar for a different problem. Note the use of `geom_binom_density()` with different values of `a` AND `b`.
+
+```{r}
+gbinom(100, 0.5, a = 30, b = 70) +
+  geom_binom_density(100, 0.5, a = 35, b = 50, color = "gray") +
+  geom_binom_density(100, 0.5, a = 55, b = 70, color = "red") +
+  theme_minimal()
+```
+
+
+
+### 3
+
+Create a data frame with columns `n`, `p`, `x`, `mu`, and `prob` where:
+
+- `n` varies from 2 to 100 by twos (so each `n` value is even);
+- `p` equals 0.5;
+- `x` is $n/2$;
+- `mu` is the mean of the distribution;
+- `prob` is $P(X = x)$
+
+Show the first few rows using `head()`.
+
+
+**(a)** What is the relationship between `x` and `mu`?
+```{r}
+n = seq(2,100,2)
+p = 0.5
+df = data.frame("n" = n, "p" = p)
+df = df %>%
+  mutate(x = n/2, mu = n*p, prob = dbinom(x, 50, p))
+```
+
+
+**(b)** Make a line graph of `prob` versus `n`.
+```{r}
+ggplot(df, aes(x = prob, y = n)) + 
+  geom_line()
+```
+
+**(c)** Describe the pattern: how does the probability that a random variable is equal to the mean (when the mean is a possible value) change as $n$ increases?
+
+
+### 4
+
+The central limit theorem implies that the binomial distribution converges to a normal distribution as $n$ increases.
+This problem will examine one aspect of the convergence, namely the right tail probability of being more than two standard deviations above the mean,
+$P(X > \mu + 2\sigma)$.
+
+**(a)** What is the probability that a normal random variable with mean $\mu$ and standard deviation $\sigma$ exceeds $\mu + 2 \sigma$? Display answer rounded to four decimal places.
+
+
+**(b)** 
+
+Create a data frame with columns `n`, `p`, `mu`, `sigma`, `x`, and `prob` where:  
+- `n` varies from 1 to 1000 by ones;  
+- `p` equals 0.5;  
+- `mu` is the mean of the distribution;  
+- `sigma` is the standard deviation of the distribution;  
+- `x` equals `mu` + 2*`sigma`;  
+- `prob` is $P(X > x)$  
+
+Display the first few rows of the data frame with `head()`.
+
+
+**(c)** Plot the right tail probabilities versus $n$. Add a red, dashed, horizontal line at the value you found in part **(a)**.
+Add a smooth curve which lessens the visual impact of the oscillations due to the discreteness of the binomial distribution.
+
+
+**(d)** Repeat parts **(b)** and **(c)** if $p = 0.005$.
+
+
+**(e)**
+
+Ignoring the oscillations, how do the patterns of the two smooth curves in the graphs differ from one another, especially when $n$ is large?
+
+
+
+### 5
+
+Draw graphs of the binomial distributions for $n=500$ and $p = 0.5$ and $p = 0.005$,
+scaled so that the x axis is restricted to where the probabilities are relatively large.  (One graph for each of the two $p$'s.)
+Overlay each plot with a red normal density with a mean and standard deviation that matches the mean and standard deviation of the corresponding binomial distribution.
+(Use functions in *gprob.R* for these graphs and set `scale=TRUE`.)
+
+Compare the skewness of the distributions. Comment on how this might help explain the differences in the right tail probabilities from Problem 3.
+

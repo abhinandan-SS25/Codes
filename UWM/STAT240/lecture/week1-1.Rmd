@@ -1,0 +1,842 @@
+---
+title: "STAT 240 Introduction"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE,
+                      error = TRUE)
+#library(tidyverse)
+```
+
+## Outline
+
+1. Introduction
+2. STAT 240 and the data science major and certificate
+3. Syllabus overview
+4. Online textbook
+5. Online course notes
+6. Discord
+7. R and R Studio
+8. A sneak preview of our first case study
+
+## Introductions
+
+- Professor: Hamna Hannan
+- TA: Nathaniel Pritchard 
+- TA: Haoran Xiong    
+
+## STAT 240
+
+- Introductory data science course
+    - Relatively new course first taught in Fall 2019
+    - Does not assume previous computing or statistics
+        - (But we start ramping up the computing right away!)
+    - Data science from a statistical point of view
+    - Required course for the data science major
+        - major began in Fall 2020
+        - first graduates in December 2021
+        - about 1150 students declared in the major prior last semester
+        - fastest growing major on campus
+    - Satisfies foundational data science requirement for the data science certificate
+
+## Syllabus Overview
+
+- Course components
+    - Discussion Assignments:
+        - bring a laptop
+        - typically a group assignment (first one is individual)
+        - assigned groups (groups change midway through the semester)
+        - most or all work intended to be completed in person
+        - TA gives a brief overview, then work with group to complete
+        - only one group member turns in the assignment
+        - **must be present and working with group to receive credit**
+        - *exceptions possible if ill and isolating* (Zoom or other)
+    - Individual Assignments:
+        - longer assignments than discussion
+        - typically due Friday evenings at 11:59pm
+        - solve problems similar to those presented in lecture
+    - Final Project:
+        - A group assignment in the last half of the course
+        - Final product:
+            - a report
+        - Students pick their own data set, pose questions, and address them with a suitable data analysis
+    - Exams:
+        - Midterm exam is during lecture
+            - may also contain a take-home computer-based portion
+        - Final exam is in-person two-hour exam
+        
+## Online textbook
+
+- *R for Data Science* by Hadley Wickham and Garret Grolemund
+    - Hadley Wickham is the mastermind behind the tidyverse expansion to the R universe which is the center of our course
+    - Free online textbook
+    - https://r4ds.had.co.nz/
+    
+## Online course notes
+
+- *Statistics 240 Course Notes and Case Studies*
+    - online notes for the course
+    - still under development
+
+## Discord
+
+- A social platform to exchange text messages and other media
+- A place to ask content questions about the course
+    - general questions
+    - questions about assignments
+    - you may register with your own name or an anonymous one
+- All instructors and TAs will contribute to responses
+- Students also encouraged to respond
+- There are different conversations for each lecture/assignment and different threads for each problem    
+- Read the appropriate thread before asking in case a similar question has already been asked!
+
+- Only use email for personal questions:
+    - disability accommodations
+    - illness notifications
+    - grading clarifications
+    - personal requests
+
+## R and R Studio
+
+- Follow instructions in the course notes to install on your computer
+- Install R, but do not work with it directly
+- R Studio will be our primary interface for
+    - writing code
+    - managing files and directories
+    - running R
+    - producing reports
+
+## Lake Mendota
+
+- Case studies for some photos and background
+- Sample steps of a data analysis
+    1. Obtain data from the web into a suitable form to read into R
+        - This data set required a fair amount of manual editing
+    2. Read in the data and check for accuracy
+    3. Consider interesting questions to ask
+    4. Wrangle the data set into a desired form
+    5. Explore with graphs and data summaries
+    6. Consider models to explain trends or differences
+    7. Iterate steps 3-6 as desired
+    8. Summarize findings in a report
+
+> How has the duration that Lake Mendota is closed by ice (at least 50% covered by ice) changed over time?
+
+### Block of code to load required libraries
+
+- We will create files with:
+   - code to carry out data analysis
+   - words to explain and interpret what we have done
+- An initial code chunk will typically load in one or more packages from the "tidyverse", a collection of extensions to the R language which work well together and help us to do many typical data science tasks
+
+```{r}
+## Load in the core tidyverse packages
+##  - including ggplot2 for graphics;
+##  - and dplyr for data calculations
+library(tidyverse)
+library(lubridate)
+```
+
+### Read and explore data
+
+- The function `read_csv()` reads data into an R session from a CSV (comma separated variable) file.
+- This code creates an object in the session named `mendota` with the data from Lake Mendota freeze durations going back over 160 years.
+    - The name in the quotes is a *path* through the directory structure to the file which contains the data
+
+```{r}
+mendota = read_csv("../../data/lake-mendota-winters-2022.csv")
+```
+
+### Create a graph to examine the question
+
+- This code chunk creates a graph.
+- Think of building a graph as adding on additional layers
+    - Each step adds something new or modifies something there before
+- This code may look intimidating at first glance, but you will be writing code similar to this next week!
+
+```{r plot}
+ggplot(mendota, aes(x=year1, y=duration)) +
+  geom_point() +
+  geom_line() +
+  geom_smooth(se=FALSE) +
+  xlab("Year") +
+  ylab("Total Days Closed by Ice") +
+  ggtitle("Lake Mendota Freeze Durations, 1855-2022")
+```
+
+### Observations
+
+- There is a decreasing trend in the duration that Lake Mendota is frozen over time
+    - In 1855, in a typical winter, Lake Mendota was frozen for over 120 days
+    - In recent times, Lake Mendota is frozen for under 80 days in a typical winter
+- The trend does not appear to be fully linear
+    - It appears that there was a decrease from the mid 1850s until about 1900
+    - There was little change in the trend from about 1900 until about 1960
+    - Since 1960, there has been a decreasing trend again, perhaps at a faster rate than the earlier decrease from 1850 - 1900.
+- There is considerable year-to-year variation
+    - In any given year, the actual duration time of Lake Mendota being closed by ice may differ from the trend line by a few weeks
+    - A two week difference is typical, but there are examples where the difference exceeds this substantially
+- The trend line may be interpreted as a **change in climate**
+- The oscillations around the trend line may be interpreted as random effects due to annual variations in the **weather**.
+- In a statistical model of this data, we may explain what we see as a central trend over time with some random noisy variation in what actually occurs each year.
+
+#### Follow-up questions
+
+1. Are there changes to the typical dates that Lake Mendota first freezes in the winter and finally thaws in the spring?
+
+2. Can we predict the thaw date based on the date the lake first freezes?
+
+3. Can we predict the total duration that the lake will be frozen in the upcoming winter?
+
+4. Is the model for the trend appropriate? Would a simpler straight-line model be adequate?
+
+5. Can we characterize the distribution of variation around the trend line?
+
+6. Is the rate of decrease in the total freeze duration larger now than it was between 1850 and 1900?
+
+### Next Tasks
+
+- Follow the course notes to:
+    - install R
+    - install R Studio
+    - install the tidyverse packages
+- Bring your laptop to class on Friday
+    - ideally, you will have the software installed
+    - if you have trouble, you will have a chance to ask for help:
+        - in office hours
+        - in the Statistics Learning Center
+        - in discussion next week
+
+- Complete the student survey
+
+- Read the first few chapters of the course notes and complete online quizzes
+
+- See the course web page for initial assignments about the course set-up
+
+## Preparation
+
+- It will be very helpful to read *CNCS* (Course Notes and Case Studies) [chapter 2](https://bookdown.org/bret_larget/stat-240-case-studies/prerequisites.html) and [chapter 5](https://bookdown.org/bret_larget/stat-240-case-studies/r-fundamentals.html) prior to this lecture.
+
+## Aims
+
+- At the end of the lecture, you should know:
+    - How to navigate within R Studio
+    - How to manage files and directories
+    - How to distinguish between the active session and knitting
+    - Key parts of an R Markdown document
+    - How to install and load a package
+    - How to create, manipulate, and calculate with vectors in R
+    - What a data frame is
+    - How to access help
+
+## Outline
+
+1. Installing R and R Studio
+2. Browser settings
+3. Setting up course directories
+4. Paths and special symbols
+5. Working Directory
+6. Interactive execution versus knitting
+    - concept of a *session*
+7. Parts of an R Markdown document
+8. Packages
+    - installing versus loading
+9. Console versus R Markdown file
+10. Vectors
+    - assignment
+    - object names
+    - arithmetic
+    - common functions
+    - data types
+11. Data frames
+    - dimensions
+    - extracting variables
+12. Using help    
+
+## Installing R and R Studio
+
+- Live demonstration on how to download R and R Studio
+    - [R](https://cran.r-project.org/)
+    - [R Studio](https://www.rstudio.com/)
+
+## Browser settings
+
+- Live demonstration of changing Chrome settings
+
+## Setting up course directories
+
+- Live demonstration of creating course directories
+    - `COURSE/`
+    - `COURSE/data/`
+    - `COURSE/hw/`
+    - `COURSE/lecture/`
+    - `COURSE/scripts/`
+    - `COURSE/discussion/`
+- Download:
+    - the example R Markdown file `02-examples.Rmd` to the `lecture` directory
+    - the data set `lake-mendota-winters-2021.csv` to the data directory
+
+## Paths and special symbols
+
+### Paths
+
+- A *path* is a string (sequence of characters) which represents a location (directory) or a file in a computer's file system
+    - An *absolute path* begins at the root of the file system
+    - Recognize an absolute path beginning with a slash (`/`)
+    - Example: `/Users/larget/Documents/stat240/`
+        - *Note*: On Windows computers, paths are specified using back-slashes (`\`) instead of slashes.
+        - However, the `\` symbol carries special meaning inside of R.
+        - R will handle using `/` for any operating system
+        - **Always** use `/` in R in paths after a directory name so your code will be reproducible on any computer operating system
+    - A *relative path* does not begin with a `/` and instead, specifies a path relative to the *current working directory*.
+    - Examples:
+        - `~/Documents/stat240/`
+        - `../../data/lake-mendota-winters-2021.csv`
+        - `./lectures/`
+        - `02-examples.Rmd`
+    - Inside of R, put quotes (typically double, `"`, but single `'` works too) around the string that represent the path
+
+### Example
+
+```{r, eval = FALSE}
+mendota = read_csv("../../data/lake-mendota-winters-2021.csv")
+```
+
+### Special Symbols
+
+- The tilde symbol `~` represents the *home directory*.
+    - On my Mac, this is `/Users/larget/`
+    - On your Mac, it is /Users/your-user-name/`
+        - (If this is also `/Users/larget/`, you are either my relative or strange.)
+    - On a Windows computer, the home directory is `Documents`.
+    - In the File manager in R Studio, this directory is labeled as `Home`.
+- The period character `.` represents the current directory.
+- A double period `..` is the *parent directory*.
+    - The parent directory is the one which directly contains another directory or file
+    
+## Working Directory
+
+- R has a notion of a *working directory*.
+- When the working directory is set, relative paths begin there instead of at the root.
+
+### Example
+
+- If I set my working directory to be `~/Documents/stat240/lecture/`, a path to the data file in `~/Documents/stat240/data/data-file.csv` may be referenced with the path `../data/data-file.csv`.
+    - `../` says navigate to the parent directory which is `~/Documents/stat240/`
+    - `data/` says navigate to its sub-directory with the name `data`
+    - the file-name is next.
+- By default, the working directory is set to be `Home` when you begin an interactive R session.
+- You will typically navigate to the directory which contains an R Markdown (.Rmd or .rmd) file and set it to be the working directory for an analysis.
+
+## Interactive execution versus knitting
+
+- When we begin an R session inside of R Studio, assuming we are not starting from a previous saved session, then:
+    - the working directory is `Home`
+    - the environment is empty
+    - you need to set the working directory
+    
+> A very common error among beginners is to navigate to the directory with an R Markdown file, open the file, and try executing the code within. The error occurs, for example, when running code with a relative path that assumes the working directory is the directory which holds the file, when the working directory is still `Home`. The path does not lead to the location of the desired file, and the command to read the file's data fails.
+
+- In contrast, when knitting a document, the directory that holds the file is set to be the working directory automatically.
+    - However, when knitting, a new clean and empty R environment is opened before any code is executed.
+    - So, for example, if you loaded the **tidyverse** library interactively, but do not have a code chunk in the file to do the same, then code from this package will not be recognized, causing an error.
+    - Similarly, objects in the environment that were created by interactively will not be present when the document is knitted.
+    
+> A common error for beginners when trying to knit a document is to fail because the document assumes that a library has been loaded or that an object exists in the environment, but the knitted document does not load the missing library or create the missing object
+
+## Parts of an R Markdown document
+
+### See the example file
+
+- An R Markdown file is separated into parts of three different types
+
+    1. The YAML section (a preamble to set some parameters)
+    2. R code chunks (sections of R code with arguments to set options about execution and what to display in the knitted document)
+    3. Markdown language (simple text with words and limited control over formatting)
+
+- The file begins with the YAML section
+- R code chunks and Markdown sections may be interspersed
+- It is also possible to include small inline elements of R code within the Markdown sections.
+
+### YAML
+
+- The YAML section is at the beginning of the file
+- The acronym YAML is a pun, as the Y is self-referencing and stands for the entire acronym YAML
+- The full acronym is "YAML ain't markdown language"
+- The YAML section is at the start of the file and begins and ends with three dashes, `---` alone on a line
+- Our YAML section will typically be very simple and do nothing more than specify that the output file format after knitting should be HTML.
+    
+````
+---
+output: html_document
+---
+````
+
+- Sometimes we will include other code in the YAML section, such as an title, author, and date, for the creation of a title page to the document
+- Think of the YAML section as a prefix to the file
+- The point about *YAML ain't markdown language* is that the special interpretations of characters (to make bullet lists, boldface font, and so on) do not work within the YAML section.
+    
+### R chunks
+
+- A chunk of R code within an R Markdown file begins with three single back ticks followed by an open brace, the letter `r`, an optional space and name for the code chunk, and then optional arguments for knitting separated by commas before an end brace.
+- The chunk ends with three single back ticks alone on a line
+- It is good practice to leave a blank line before and after each code chunk
+    - This treats each code chunk as a separate "paragraph".
+    - If the code produces a graph, you may have text starting to the right of the plot instead of on a separate line below the plot in the knitted document if you do not leave a blank line after the code chunk.
+
+#### Examples
+
+- A minimal example
+
+````markdown
+`r ''````{r}
+# some code here
+```
+````
+- A named R code chunk
+
+````markodwn
+`r ''````{r chunk-name}
+# more code here
+```
+````
+
+- An R chunk with an argument to not include the code or the output in the knitted document
+
+````markdown
+`r ''````{r include = FALSE} ``
+# some code
+```
+````
+
+- A named R chunk that specifies the height and width of the figure in inches and suppresses the code to make the graph.
+
+````markdown
+`r ''````{r example-chunk-name, echo = FALSE, fig.height = 3, fig.width = 6}
+# code to make the plot
+```
+````
+    
+### Markdown
+
+- Markdown is a simplified way to code formatting in documents that are easy for people to read and write.
+- A *Markup* language, in contrast, such as HTML (Hyper Text Markup Language) or LaTeX, is substantially more complicated and richer and allows for much more fine control of the formatted output.
+- Learn Markdown by editing example files we provide.
+- A few basics:
+    - Use hashes `#` to create headers.
+        - A single `#` is a very large header
+        - The more hashes (`####`, for example), the smaller the header is.
+- Use dashes (`-`, or `*` or `+` if you prefer) for bullet lists
+- Indent four spaces for a sub-list.
+- If you use numbers instead of dashes, you get a numbered list.
+
+- Put single asterisks around a word or phrase for *italics*.
+- Put double asterisks around the same for **bold face**.
+
+- See the R Markdown cheatsheet for a quick reference.
+    
+## Packages
+
+- We will install a few packages for the course
+- You only need to install a package once
+- Your computer needs to be connected to the network when you install
+- The course notes describe using the point-click package installer.
+- You can also use the `install.packages()` command.
+- Installing a package involves downloading code from a repository and putting it somewhere on your computer
+- If, when installing a package, you are asked if you want to compile, it is best to answer **no**.
+    - Your computer is likely not set up to compile code the right way and this can cause the installation to fail.
+    - Instead, you will install a pre-compiled version for your operating system.
+
+- In contrast, you need to **load** a package using the `library()` command for each session.
+- We will typically install all required packages in an initial set-up R chunk in the file.
+
+## Console versus R Markdown file
+
+- You can run R interactively by typing into the console.
+- It is better to write and edit R code into an R Markdown file.
+- This leads to keeping a reproducible history of your work that you can share with others and with your future work.
+- I occasionally type something quick into the Console for a one-off calculation I do not need to save, but any work on an assignment or project or anything even slightly complicated is best done by writing code in a file and then executing that code.
+
+## Vectors
+
+- A vector is sequence of objects that all have the same type (such as a vector of integers, or double precision numbers, or character strings).
+- There are many ways to create and manipulate vectors in R.
+- In the tidyverse, we generally will work with vectors only as columns in data frames, but it helps to understand how base R vectors work first before moving on to data frames.
+- The file `02-examples.Rmd` will have many examples to work through interactively.
+
+
+
+## Using help
+
+- There is a help document for each R function.
+- Not all are written to be helpful to someone new to the language.
+- It is a good skill to be able to learn to skim a help entry to identify a few key items
+    - The list of arguments and what they mean
+    - The order of the arguments
+    - What the output of the function is
+    - Examples at the bottom
+- We will see a few live demonstrations of this    
+
+## Base R Examples
+
+### Vectors
+
+- Most data in the course we will create by reading data in from a text file (.txt or .csv or .tsv), from Excel files (.xlsx or .xls), or, rarely, directly from a web site using a function to read tables from HTML.
+- But it is useful to know how to create a vector from scratch.
+- Here are several examples.
+- In each case below, the code creates a vector without assigning it to a name.
+    - The vector is created, printed to output, and not saved.
+
+#### Sequences
+
+- Use the colon operator to create sequences of integers
+- Notice in the output that each line begins with a label in square brackets which identifies the position of the first element of the vector on that line
+
+##### The colon operator
+
+```{r}
+## 1 through 10
+1:10
+
+## 20 through 100
+20:100
+
+## 10 to 1
+10:1
+
+## Negatives
+-2:5
+-10:-1
+```
+
+##### seq()
+
+- The function `seq()` allows more flexibility.
+    - The elements do not need to be integers
+    - The first arguments are `from` and `to`
+    - The third argument is `by`, which is the step size.
+    - You may also specify the desired length with `length.out`.
+    - You do not need to name the arguments if they are in order
+    - There are defaults (`from = 1`, `to = 1`, `by = ((to = from)/length.out))`
+    
+```{r}
+## default sequence from 1 to 1
+seq()
+
+## sequence from 1 to 10 by 0.5
+seq(1, 10, 0.5)
+
+## same, using named arguments
+seq(from = 1, to = 10, by = 0.5)
+
+## same, if named arguments, can be passed in any order
+seq(to = 10, by = 0.5, from = 1)
+
+## same, specifying the length
+seq(1, 10, length.out = 19)
+```
+    
+##### c()
+
+- The handy function `c()` combines arbitrary values into a vector
+
+```{r}
+c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+
+c(1:5, 10)
+
+c(1, 1, 2, 3, 5, 8, 13, 21)
+```
+
+### Assignment
+
+- The conventional symbol to assign a vector (or any other object in R) to a name is the two-character combination `<-` which looks like an arrow.
+
+```{r}
+v1 <- 1:10
+v1
+```
+
+- An alternative (which I prefer, but am in the minority) is the equal sign `=` which is conventional in most computer programming languages.
+
+```{r}
+v2 = 1:10
+v2
+```
+
+- Note that the equal sign has different meaning in different contexts.
+    - We use this symbol to assign values to arguments in function calls, as we saw before.
+    
+```{r}
+## The first = is assignment in creating an object
+## The second = is for naming an argument
+v3 = seq(1, 11, by = 2)
+v3
+```
+
+- Use whichever symbol you prefer.
+- It is better for readability of your code to be consistent with your choice.
+
+### Object names
+
+- Object names made be made up of lower case letters, `a-z`, upper case letters `A-Z`, digits `0-9`, and the symbols period `.` and under score `_`.
+    - R is case sensitive, so the names `a` and `A` are different.
+    - A valid name cannot begin with a number.
+    - As the period has special meaning in some contexts, I tend to avoid its use.
+    - A name which begins with a `.` is also good to avoid as these are conventionally reserved for special system variables and are hidden in the environment.
+    - You can override the naming conventions by wrapping a name between single back quotes
+    
+```{r}
+## trying to use an illegal name causes an error
+##1a = 10
+
+## a legal assignment
+a = 10
+
+## a legal assignment, but the variable does not appear in the environment
+.a = 10
+
+## Use the function ls() to list all objects
+## Note .a is not included
+ls()
+
+## Add an argument to show the hidden variables too
+## Who knew that .Random.seed was hanging around!
+ls(all.names = TRUE)
+```
+    
+### Arithmetic
+
+- In many computer languages, you need loops to work over vectors (or arrays) of value
+- In R, most of the language is *vectorized*, so you do not need explicit loops.
+- When doing conventional arithmetic with vectors, all of the calculations are done element by element.
+
+```{r}
+## two small example vectors
+a = 1:3
+b = 4:6
+a
+b
+
+## addition by element
+a + b
+
+## subtraction by element
+b - a
+
+## multiplication by element
+a*b
+
+## division by element
+a/b
+
+## exponentiation by element
+a^b
+```
+
+- If you wanted to take a dot product, you could multiply by elements and then sum the results
+
+```{r}
+## dot product
+sum(a*b)
+```
+
+- It is also common to do operations between a single number and a vector of numbers.
+- Effectively, the single number is replicated to be the same length as the vector and then the operations occur.
+
+```{r}
+s = 5
+s
+
+## addition
+a + s
+
+## subtraction
+a - s
+
+## multiplication
+a*s
+
+## division
+a/s
+s/a
+
+## exponentiation
+s^a
+a^s
+```
+
+#### Incompatible sizes
+
+- R allows vector arithmetic with incompatibly-sized vectors
+- The shorter vector is replicated to be the same length as the longer one.
+- If it does not work evenly, then a warning is produced.
+
+```{r}
+a
+d = 4:5
+d
+
+## adding a = c(1,2,3) and d = c(4,5)
+## d is changed to c(4,5,4), but the last repeat of 4,5 is stopped short
+## a warning is given as this was likely an error
+a + d
+```
+
+## Common functions
+
+- There are a number of common functions that act on each element of a vector individually.
+
+```{r}
+a
+
+## exp()
+exp(a)
+
+## natural log, log()
+log(a)
+
+## log base 10
+log10(a)
+log(1, base = 10)
+
+## trig functions
+## Note the use of the built in value pi
+## Ideal 0 may not be calculated exactly on a computer
+## When a number ends e-16, this is a shorthand for times 10^(-16)
+## Small numbers like this are effectively zero
+sin(a * pi)
+cos(a * pi)
+tan(a*pi)
+```
+
+- Other functions summarize a vector of numbers into a single summary value
+
+```{r}
+a
+
+## sum
+sum(a)
+
+## mean
+mean(a)
+
+## standard deviation
+## if you have had a stats course before....
+sd(a)
+
+## length
+length(a)
+
+## maximum
+max(a)
+
+## minimum
+min(a)
+
+## median
+median(a)
+
+## quantiles
+## there are many definitions of quantiles
+quantile(a, 0.2)
+quantile(a, 0.2, type = 3)
+
+```
+
+## Data types
+
+- R has several data types
+- Use the function `class()` to identify each
+
+```{r}
+## colon creates integers
+a = 1:3
+a
+class(a)
+
+## seq() creates numeric values
+b = seq(1,3,1)
+b
+class(b)
+
+## There are also character-valued vectors
+x = c("A", "B", "C")
+x
+class(x)
+
+## And logical
+y = c(TRUE, TRUE, FALSE)
+y
+class(y)
+```
+
+- There are several more types
+- We will see dates and times in a few weeks.
+
+- You cannot mix data types in a vector.
+- If you try, R will coerce the elements to be the same type
+
+```{r}
+d = c(1, 2, "A")
+
+## Note that the 1 and 2 were converted to character valued
+d
+```
+
+- You can change types of variables with a collection of functions with names like `as.integer()`, `as.numeric()`, `as.character()`
+
+```{r}
+b = seq(1,5)
+b
+class(b)
+
+bb = as.integer(b)
+bb
+class(bb)
+
+as.character(bb)
+```
+
+## Data frames
+
+- We will mostly examine data packaged into a data frame
+- Each column of a data frame is a vector
+- The elements of a vector must be the same, but vectors of different types may be in the same data frame
+- We will most often create data frames by reading in data from a file
+- But we can make these by hand too
+
+```{r}
+## LETTERS is a built in vector with the 26 capital letters
+## The square bracket operator takes a subset, here the first 10
+dat = data.frame(x = LETTERS[1:10], y = 1:10)
+dat
+class(dat)
+
+## Here are three ways to grab the vector that is the first column
+## The $ operator
+dat$x
+
+## Double square brackets (treats the data frame as a list of its columns)
+dat[[1]]
+dat[['x']]
+
+## Single brackets with a comma between dimensions
+## Blank keeps all
+dat[,1]
+```
+
+- We often want to know the dimensions (number of rows and columns) of a data frame
+
+```{r}
+dim(dat)
+nrow(dat)
+ncol(dat)
+```
+
+## Summary
+
+- There are many base R functions for dealing with data
+- We will focus moving forward on the tidyverse extension to R
+- The syntax is quite different, but underneath there are a lot of base R calculations on vectors happening

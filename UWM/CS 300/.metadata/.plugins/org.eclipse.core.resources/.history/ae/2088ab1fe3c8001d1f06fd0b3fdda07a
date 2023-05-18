@@ -1,0 +1,60 @@
+public class StarshipRobot extends MovingThing{
+  private Thing source; //source point of this StarshipRobot at its current journey delivering food to badgers
+  private Thing destination; //destination point of this StarshipRobot at its current journey delivering food to badgers
+  
+  public StarshipRobot(Thing source, Thing destination, int speed) {
+    super(source.x, source.y, speed, "starshipRobot.png");
+    this.destination = destination;
+    this.source = source;
+    
+    if (destination.x > source.x) {
+      this.isFacingRight = true;
+    }
+    else {
+      this.isFacingRight = false;
+    }
+  }
+  
+  @Override
+  public void draw() {
+    this.go();
+    super.draw();
+  }
+  
+  public void go() {
+    moveTowardsDestination();
+    // switch source and destination if this StarshipRobot reached its destination
+    if (this.isOver(this.destination)) {
+      Thing d = destination;
+      destination = source;
+      source = d;
+      isFacingRight = !isFacingRight;
+    }
+  }
+  
+  private void moveTowardsDestination() {
+    float dx = destination.x - this.x; // x-move towards destination
+    float dy = destination.y - this.y; // y-move towards destination
+    int d = (int) Math.sqrt(dx * dx + dy * dy); // distance to destination
+    if (d != 0) { // move!
+      this.x += speed * dx / d;
+      this.y += speed * dy / d;
+    }
+  }
+  
+  public boolean isOver(Thing thing) {
+ // (x1 < x4) && (x3 < x2) && (y1 < y4) && (y3 < y2)
+    float x1 = x - this.image().width / 2;
+    float x2 = x + this.image().width / 2;
+    float y1 = y - this.image().height / 2;
+    float y2 = y + this.image().height / 2;
+
+    float x3 = thing.x - thing.image().width / 2;
+    float x4 = thing.x + thing.image().width / 2;
+    float y3 = thing.y - thing.image().height / 2;
+    float y4 = thing.y + thing.image().height / 2;
+
+    return (x1 < x4) && (x3 < x2) && (y1 < y4) && (y3 < y2);
+  }
+
+}

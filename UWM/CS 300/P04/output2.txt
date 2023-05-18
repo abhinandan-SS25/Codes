@@ -1,0 +1,7 @@
+Total number of patients: 2
+Total number seen: 2
+RED: 0
+YELLOW: 2
+GREEN: 0
+20503: 5M (YELLOW)
+11504: 15F (YELLOW)

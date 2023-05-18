@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="CondMazeClasses">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/CondMazeClasses.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

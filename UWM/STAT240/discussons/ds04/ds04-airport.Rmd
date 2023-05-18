@@ -1,0 +1,156 @@
+---
+title: "Discussion 4"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, message=FALSE, warning=FALSE, error=TRUE)
+library(tidyverse)
+library(lubridate)
+source("../../scripts/viridis.R")
+```
+
+## Group 341:5
+
+## Members Present
+
+- **Abhinandan Saha**
+Will Tappa
+Andrew Tran
+Ark Dutt
+
+## Members Absent
+
+- ADD NAMES OF ANY ABSENT MEMBERS
+
+## Data
+
+You need the following datasets for this discussion (found on canvas).
+
+ - `atlanta-2018.tsv`
+ - `chicago-2018.csv`
+
+Note the Atlanta file is a tsv file (tab separated values), which means the columns are separated by tabs, and needs to be read by the `read_tsv` command, which is included in the `readr` package.
+
+Also note the Chicago csv file we are providing for this discussion is different than the ORD-2018 csv file we used in lecture. This file is separated by semicolons, which is the common format in Europe, so you need to use the European version of the read command `read_csv2` to read it in correctly.
+
+Of course you can use `read_delim` instead of `read_tsv` and `read_csv2` if you specify the correct delimiter argument, but these specialized functions may be more convenient.
+
+```{r}
+atlanta = read_tsv("../../data/atlanta-2018.tsv")
+chicago = read_delim("../../data/chicago-2018.csv", delim = ";")
+
+```
+
+
+
+## Questions
+
+### 1
+
+Complete the chunk below to do the following:
+
+1. Select only the `airport`, `date`, `all_total`, and `all_flights` columns,
+2. Parse the `date` column into a date format,
+3. Rename the `all_total` and `all_flights` columns as `passengers` and `flights`,
+4. Compute total passengers and flights counts for each date at each airport,
+5. Add columns `wday` and `month` to indicate the weekday and month each date corresponds to. Make sure to use `label=TRUE` to get a name output,
+6. And finally, sort the data frame by date from earliest to latest.
+
+```{r}
+atlanta = atlanta %>%
+  select(airport, date, all_total, all_flights) %>%
+  mutate(date = mdy(date)) %>%
+  rename(passengers = all_total, flights = all_flights) %>%
+  group_by(airport, date) %>%
+  summarize(total_flights = sum(flights), total_passengers = sum(passengers)) %>%
+  mutate(wday = wday(date, label = TRUE), month = month(date)) %>%
+  arrange(date)
+
+```
+
+
+
+### 2
+
+Now, do the following:
+
+- Create a summary data frame named `atl_sum` with columns for the average number of international flight arrivals per day and the average number of daily passengers arriving on international flights per day in Atlanta by day of the week.
+- This data frame will have three columns, one for day of the week, and one for each of the two quantitative variables.
+- Print out the summary data frame in a table with the rows arranged in order by days of the week from Sunday through Saturday.
+- Also, print out the summary data frame in a table with the rows arranged in order from most to least average number of international flight arrivals.
+
+*Note:  You should have two summary data frames print, each arranged in a different order according to the directions above.*
+
+```{r}
+atl_sum = atlanta %>%
+  group_by(wday) %>%
+  summarize(avg_passengers = sum(total_passengers)/n(), avg_flights = sum(total_flights)/n())
+
+atl_sum %>%
+  arrange(desc(wday)) %>%
+  print(n=7, c=everything())
+
+atl_sum %>%
+  arrange(desc(avg_flights)) %>%
+  print(n=7, c=everything())
+
+```
+
+
+
+### 3
+
+> On what single date in April of 2018 did the largest number of international passengers arrive at the Atlanta airport? How many passengers were there? What day of the week was this date?
+
+```{r}
+apr_sum = atlanta %>%
+  filter(month == 4) %>%
+  arrange(desc(total_passengers)) %>%
+  slice(1)
+
+apr_passengers = apr_sum %>%
+  select(total_passengers)
+apr_week = apr_sum %>%
+  select(wday)
+
+apr_passengers
+apr_week
+```
+
+
+
+### 4
+
+> Read in the data for Chicago using the appropriate `read_*()` command.  (Each row in the data file represents an hour of a day. You will need to transform the data to obtain the values to graph. Borrow code from problem 1 to help.)
+
+-  Make a bar plot that shows the mean number of passengers arriving per day to O'Hare international airport by day of the week.
+
+```{r}
+chicago = chicago %>%
+  select(airport, date, all_total, all_flights) %>%
+  mutate(date = mdy(date), all_flights = as.numeric(all_flights), all_total = as.numeric(all_total)) %>%
+  rename(passengers = all_total, flights = all_flights) %>%
+  group_by(airport, date) %>%
+  summarize(total_flights = sum(flights), total_passengers = sum(passengers)) %>%
+  mutate(wday = wday(date, label = TRUE), month = month(date)) %>%
+  arrange(date)
+
+chg_sum = chicago %>%
+  group_by(wday) %>%
+  summarize(avg_passengers = mean(total_passengers), avg_flights = mean(total_flights))
+
+ggplot(chg_sum, aes(x=wday, y=avg_passengers)) + 
+  geom_col()
+```
+
+
+
+### 5
+
+> Using the Chicago data, make a line plot that shows the total number of international flights arriving to the airport by month. (Note: add `group = 1` as an aesthetic so that there is a single line for all months.)
+
+```{r}
+
+```
+

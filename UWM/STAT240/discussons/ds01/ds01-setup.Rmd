@@ -1,0 +1,55 @@
+---
+title: "Discussion 1"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
+library(tidyverse)
+```
+
+## Preliminaries
+
+Create discussion folders and change browser settings if needed.
+Download this discussion file and the `lake-mendota-winters-2022.csv` to your `COURSE/discussion/ds01/` directory.
+
+## Questions
+
+### Question 1
+
+Set the `ds01` directory to be be your *working directory*.
+Type `getwd()` in the Console and verify that you see that the working directory is set to be `ds01`.
+If not, learn how to set the working directory from someone in your group or the TA.
+
+When you knit this document,
+the following R chunk will print your working directory to the output document.
+
+```{r getwd, echo=TRUE, results='asis'}
+getwd()
+```
+
+### Question 2
+
+The following R chunk will read the data.
+The `names()` command will print the names of the variables in the data frame.
+
+Replace the text XXX below with the correct numbers.
+
+```{r read-data}
+## Note:  The path to the data set was updated to the location of the data file
+mendota = read_csv("../../data/lake-mendota-winters-2022.csv")
+names(mendota)
+```
+
+
+#### Response
+
+The Lake Mendota data set has 7 variables (indicate the number of variables) and the first variable (next to the `[1]`) is named XXX.
+
+
+## Submission
+
+Once you have completed all of the questions, knit the document.
+This should create an HTML document in your `ds01` folder.
+
+Go to the Canvas course web page, find the Assignments section in the left panel, and upload both your edited Rmd and output HTML files.

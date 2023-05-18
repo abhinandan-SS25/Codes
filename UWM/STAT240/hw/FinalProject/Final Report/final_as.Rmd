@@ -1,0 +1,178 @@
+---
+title: "Final report A.S."
+output: html_document
+date: "2023-04-28"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(lubridate)
+library(dplyr)
+```
+
+# Introduction
+
+As we continue to grapple with the urgent challenges of climate change, there are few issues more pressing than the relationship between greenhouse gas emissions and rising sea levels. For years, scientists have been sounding the alarm about the potentially devastating consequences of unchecked carbon emissions on our planet's oceans and coastlines. But just how strong is the connection between these two phenomena, and what can we do to mitigate their impact?
+
+In this report, we set out to answer these pressing questions by exploring the complex relationship between CO2 emissions and sea level rise. Through a detailed analysis of a comprehensive dataset that includes information on CO2 emissions from various countries over time, as well as monthly measurements of sea level relative to a baseline average, we aim to shed new light on the factors driving climate change and identify potential solutions for reducing its impact.
+
+Our study is motivated by a desire to better understand the causes and consequences of climate change, and to identify concrete steps that we can take to protect our planet's oceans and coastal communities. By exploring the connection between greenhouse gas emissions and sea level rise, we hope to provide policymakers, business leaders, and individuals with the insights they need to make informed decisions about how to mitigate the impact of climate change and build a more sustainable future.
+
+In short, the stakes could not be higher, and the time to act is now. We hope that our report will inspire readers to take action and make a meaningful contribution to the fight against climate change. Together, we can create a brighter, more sustainable future for all.
+
+# Background
+
+> We read in the two datasets and create dataFrames "co2" and "sea_level".
+
+```{r}
+co2 = read.csv("annual-co2-emissions-per-country.csv")
+sea_level = read.csv("Global_sea_level_rise.csv")
+```
+
+
+## Dataset Descriptions
+
+### CO2 Dataset
+
+The CO2 dataset has 4 variables - entity, code, year, and annual.co2.emissions. Each row corresponds to a country, group of countries in a continent, or continent and their CO2 emissions every year from 1750 to 2021. However, not all entities have data available for all years. It has 31349 rows and 4 columns.
+
+| Variable Name        | Description                                                               |
+|----------------------|---------------------------------------------------------------------------|
+| entity               | The name of the country, continent, or group of countries in a continent. |
+| code                 | The unique country code.                                                  |
+| year                 | The year of observation.                                                   |
+| annual.co2.emissions | The annual CO2 emissions of the entity in tonnes.                          |
+
+This data was collected from Our World in Data, which collects CO2 dataset sources from various reputable sources such as national and international government agencies, academic research institutions, and intergovernmental organizations. Our World in Data cites Carbon Dioxide Information Analysis Center (CDIAC) as one of their primary data sources for CO2 emissions. CDIAC is a research group within the Oak Ridge National Laboratory in the United States, responsible for collecting and disseminating data on greenhouse gas emissions. In addition to CDIAC, Our World in Data also references data from organizations such as the United Nations Framework Convention on Climate Change (UNFCCC), the Intergovernmental Panel on Climate Change (IPCC), and the World Bank, as well as numerous scientific publications and research papers.
+
+We will use this dataset to analyze the trend of greenhouse emissions through the years, the total emission of the world through the years, the main emitters, and how they vary within entities through continents and globally. This dataset has data about different entities - not just countries - and does not have data about some entities through all the years. These discrepancies may exist, but on a global level, they still should be enough to show the trend.
+
+### Sea Level Dataset
+
+The sea level dataset has 3 variables - year, date, and mmfrom1993.2008average. Each row corresponds to the mean sea level difference from the average mean sea level between 1993 and 2008 for each year. The date variable is not needed since we are only concerned with the yearly mean sea level and its analysis. It has 141 rows and 3 columns.
+
+| Variable                   | Description                                                                                                                                                                                |
+| --------------------------| ------------------------------------------------------- |
+| **year**                   | The year of observation.                                                                                                                                                                   |
+| **mmfrom1993.2008average** | The mean sea level difference from the average mean sea level between 1993 and 2008. This is used to conceptualize the sea level as relative to some quantity, and in this case, the quantity is the 1993-2008 mean sea level average. |
+
+This dataset was collected from Kaggle, and it consists of global sea level rise as provided by climate.gov. The data used by Climate.gov for sea level analysis is gathered from a variety of sources, mainly satellite measurements, and additionally tide gauges, and other observational data. Satellite measurements are a critical source of information for sea level analysis because they provide a comprehensive view of the ocean surface. These measurements are obtained using altimeters, which bounce microwave pulses off the ocean surface and measure the time it takes for the signal to return. By analyzing the timing of these signals, scientists can determine the height of the ocean surface relative to a reference level. Other observational data used by Climate.gov to analyze sea level include measurements of ocean temperature and salinity. Changes in these parameters can impact sea level, so they are important factors to consider when analyzing sea level data.
+
+We will use this dataset to analyze and show the trend and overall correlation (if there exists one) between greenhouse gas emissions and sea level rise through the years. The data produced may differ from data from other sources since a relative model is being used to measure the sea level.
+
+> Exploratory Data Analysis
+
+#### sea_level
+
+```{r}
+sea_level$date
+```
+
+- As we can observe, the date columns for all the years have the same date, that is 15th of July. This is the date that the data for the year was aggregated and published. Since this is the same for every year, we do not need the date column and will be dropping them for further analysis and use while cleaning.
+
+#### co2
+
+```{r}
+summary(co2)
+```
+
+- We observe that the min Co2 emissions are 0. This indicates that there are missing data values for some observations. The reason for this might be because of missing or unavailable data for those countries and years. It is better that we drop the data so that it doesn't interfere with analysis later on. 
+
+```{r}
+co2$Entity %>%
+  unique()
+```
+
+- From the values generated we can also see the names of Continents and "World" and other such entities. So, for analysis, we need to divide the data and extrapolate the values for the world emissions, for individual countries through the years and by continents through the years. So we are going to create new datasets with the required values after cleaning.
+
+> Cleaning the Data
+
+```{r}
+sea_level_f = sea_level %>%
+  select(!date) %>%
+  rename("Relative mean sea level (mm)" = "mmfrom1993.2008average")
+sea_level_f
+
+co2 = co2 %>%
+  filter(Year >= 1880)
+
+co2_per_year = co2 %>%
+  filter(Code != "" & Code != "OWID_WRL") %>%
+  group_by(Year) %>%
+  summarize(Annual_CO2_tonnes = sum(Annual.CO..emissions), Annual_CO2_million_tonnes = Annual_CO2_tonnes / 1000000)
+co2_per_year
+
+co2_by_country = co2 %>%
+  filter(Code != "" & Code != "OWID_WRL") %>%
+  group_by(Year, Entity) %>%
+  summarize(Annual_CO2_tonnes = sum(Annual.CO..emissions), Annual_CO2_million_tonnes = Annual_CO2_tonnes / 1000000) %>%
+  filter(Annual_CO2_tonnes != 0)
+co2_by_country
+
+co2_by_continent = co2 %>%
+  filter(Code == "" & Code != "OWID_WRL", Entity %in% c("Asia", "Europe", "Africa", "North America", "South America", "Australia")) %>%
+  group_by(Year, Entity) %>%
+  summarize(Annual_CO2_tonnes = sum(Annual.CO..emissions), Annual_CO2_million_tonnes = Annual_CO2_tonnes / 1000000) %>%
+  filter(Annual_CO2_tonnes != 0)
+co2_by_continent
+```
+
+We have cleaned the Data to create 4 new datasets. The "sea_level_f" dataset corresponds to the sea_level datasets with the date coumn dropped. The "co2_per_year" dataset corresponds to only aggregate the Data for the whole world through the years extrapolated from the co2 dataset. The "co2_by_country" dataset corresponds to the aggregate data for only the countries through the years and "co2_by_continent" dataset corresponds to only aggregate data for only the continents through the years. We have also dropped rows with missing data for the co2 emissions. We also have only included data 1880 onwards for the co2 dataset and the derived datasets for consistancy with the sea_level dataset and due to a large number of missing values for those years for a lot of countries.
+
+> More Information Regarding Data
+
+Some analysis and visualizations of the data.
+
+
+```{r}
+ggplot(co2_per_year, aes(x=Year, y=Annual_CO2_million_tonnes)) + 
+  geom_line() + 
+  xlab("Year") + 
+  ylab("Annual CO2 emmissions (million tonnes)") + 
+  ggtitle("Annual CO2 emissions (million tonnes) for every year")
+```
+
+```{r}
+ggplot(sea_level_f, aes(x=year, y=sea_level_f$`Relative mean sea level (mm)`)) +
+  geom_line() +
+  xlab("Year") + 
+  ylab("Relative Sea Level") +
+  ggtitle("Rise of the relative mean sea level through the years")
+```
+
+```{r}
+country_plot = co2_by_country %>%
+  group_by(Entity) %>%
+  summarize(total_co2 = sum(Annual_CO2_million_tonnes)) %>%
+  arrange(desc(total_co2)) %>%
+  head(total_co2, n=10)
+
+country_plot 
+
+ggplot(country_plot, aes(x=reorder(Entity, total_co2), y=total_co2/100000)) + 
+  geom_col() +
+  xlab("Country") + 
+  ylab("Total co2 emissions (hundred billions)") + 
+  ggtitle(" Total co2 emissions by the 10 most emitting countries per hundred billions through the years 1750 to 2021")
+```
+
+```{r}
+continent_plot = co2_by_continent %>%
+  group_by(Entity) %>%
+  summarize(total_co2 = sum(Annual_CO2_million_tonnes))
+
+continent_plot
+
+ggplot(continent_plot, aes(x=reorder(Entity, total_co2), y=total_co2/100000)) + 
+  geom_col() +
+  xlab("Continent") + 
+  ylab("Total co2 emissions (hundred billions)") + 
+  ggtitle(" Total co2 emissions by each continent per hundred billions through the years 1750 to 2021")
+```
+
+
+# Refrence
+^["climate.gov/news-features/understanding-climate/climate-change-global-sea-level"]
+^["https://ourworldindata.org/"]

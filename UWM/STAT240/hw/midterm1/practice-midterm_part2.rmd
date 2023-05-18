@@ -1,0 +1,192 @@
+---
+title: "Midterm"
+author: "REPLACE THIS WITH YOUR FULL NAME"
+output: html_document
+---
+
+<style>#header{margin-bottom:30px;}div.level2{margin:40px 0 70px;}div.level3{margin-top:40px;}</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=T,message=F,warning=F,fig.height=5,fig.width=6,fig.align="center")
+library(tidyverse)
+library(lubridate)
+library(readxl)
+```
+
+
+## Important info!
+
+1. You can use all notes, files, videos, and [cheat sheets](https://www.rstudio.com/resources/cheatsheets/) presented in class or found on canvas. You may also reference R documentation manuals for any function. However, you may NOT search for other help online or discuss exam materials with anyone.
+2. **All plots MUST have appropriate titles and labels**. Failure to do so may cause you to lose points.
+3. If you are asked to print out rows of a data frame, you must do so, or you may lose points.
+4. It's always Y vs X, NOT X vs Y. If we say A vs B, it means A should be on the vertical axis, and B should be on the horizontal axis. Switching these is incorrect!
+5. Remember to double **check your HTML and Rmd files BEFORE submitting**. Submitting a file with errors, or submitting the wrong file may also cause you to lose points.
+6. If you **have any questions, please email your instructor and also CC all TAs in your section** for the fastest response. Failing to do so may result in a slower response time. We will try to respond to your email as soon as we can.
+7. If there is a **problem with submitting on canvas, please email us ALL exam files IMMEDIATELY**! Failure to do so may result in a 0 for the exam.
+8. We take academic honesty very seriously. Cheating of any kind will NOT be tolerated and may result in a 0 or even failing the class.
+
+
+
+
+## Question 1 - EPA air quality data
+
+
+For this first question, we will be using Madison air pollution data provided by the Environmental Protection Agency (EPA), which collects data about air quality using monitoring stations throughout the country.
+
+
+
+```{r}
+air = read_csv("../../data/madison-pm2.5-data.csv")
+```
+
+We can double check the files have all been read in correctly. There should be 10898 rows and 20 columns.
+
+```{r}
+dim(air)
+head(air)
+```
+
+### Part 1A <small>8pts</small>
+
+
+Perform the following basic data cleaning/processing operations.
+
+1. Select out the following columns that we care the most about:
+   - `Site.ID`: ID of the station that made the observation
+   - `Site.Name`: name of the station that made the observation
+   - `Date`: date of observation
+   - `Daily.Mean.PM2.5.Concentration`: concentration of "fine inhalable particles" that are "2.5 micrometers and smaller", in ug/m³.
+   - `DAILY_AQI_VALUE`: Air Quality Index value, used by EPA to report quality. See this for more info [aqi chart](https://miro.medium.com/max/1400/0*vzT6W-NevzPXAKls.png).
+2. Rename the columns above (in the same order) `id`, `name`, `date`, `pm2.5`, `aqi`.
+3. Parse the `date` column into a standard date format.
+4. Ensure `id` is a character, NOT a number (since it has no numerical meaning).
+5. Remove any rows where either `pm2.5` or `aqi` might be missing or negative (would indicate error in measurement/reporting).
+6. The most complete data comes from station ID "550250047". Keep only data from this station and remove other stations.
+7. In order to have complete data in each year (to account for seasonal effects), remove 1999 and 2022 and keep only the years 2000-2021.
+8. Add `year` and `month` columns to the data frame by extracting them from the `date` column. **Make sure `month` uses abbreviated labels (i.e. Jan, Feb, etc.)** (if this displays in a different language, that's ok).
+9. Sort the rows by date (earliest date at the top).
+
+After doing all these steps and saving the result, **print out the first few rows** of your data frame!
+
+(hint: if you did this right, you should have 5028 rows left)
+
+```{r}
+# insert code below
+
+```
+
+
+
+
+### Part 1B <small>8pts</small>
+
+
+Let's start by visualizing the data. Make the following two plots.
+
+1. Summarize the data by calculating the mean `pm2.5` value for each year, then plot this on a scatter plot and overlay a smooth curve through the points.
+2. Summarize the data by calculating the mean `pm2.5` value for each month (i.e. average all January values, then all February values, etc.), then plot this on a red-filled bar plot.
+
+Comment on these plots. What overall trend do you observe in yearly PM2.5 levels? Has it been increasing or decreasing overall? Are there seasonal trends in pollution from month to month? Which seasons have the highest and lowest PM2.5 levels? Are there any other interesting things you observe?
+
+```{r}
+# insert code below
+
+```
+
+
+
+
+### Part 1C <small>8pts</small>
+
+
+The EPA uses PM2.5 as well as levels of other pollutants (if present) to calculate AQI, which represents how healthy the air is to breathe. AQI values of 50 or under are considered good, between 50-100 are considered satisfactory, and greater than 100 are considered potentially unhealthy to breathe for some people.
+
+Answer the following questions:
+
+1. Make a scatter plot of AQI vs PM2.5. Looking at the plot, approximately what value of PM2.5 corresponds with an AQI of 50? What value corresponds with AQI of 100?
+2. How many days in the past 21 years of data that we have in Madison were considered potentially unhealthy to breathe? What were the 5 most recent such dates?
+
+Reminder: remember it's always Y vs X, NOT X vs Y.
+
+```{r}
+# insert code below
+
+```
+
+
+
+
+### Part 1D <small>8pts</small>
+
+
+Summarize for each month of each year (i.e. each unique combination of year and month), the proportion of days that had AQI values less than or equal to 50 (the highest category of air quality). Pivot this into a wider format with each year on a row, each month in a new column (i.e. 12 new columns, one for each month), and the proportions of days filling the table. **Print ALL rows of this table** (hint: you can pipe your output into `%>% print(n=Inf)`).
+
+Comment on the output. Specifically, are there any months with missing values? If yes which ones? In recent years, do most months seem to have the majority of their days satisfying AQI ≤ 50? Are there any times where several months in a row had all their days satisfying AQI ≤ 50? If yes, what is the longest such sequence, and which months were they? Are there any other interesting things you observe?
+
+```{r}
+# insert code below
+
+```
+
+
+
+
+
+## Question 2 - Wealth and happiness data
+
+
+For this next question, we will be using wealth and happiness data from TheGlobalEconomy.com, which compiles many different country-wide statistics.
+
+Download the file `country.xlsx` from Canvas ([backup link](https://pages.stat.wisc.edu/~bwu62/240/country.xlsx)). In this file are 3 sheets:
+
+1. Sheet 1 contains 2018 GDP per capita (PPP) data, which is used as a measure of the average wealth for each country and is adjusted for currency rates and average price of goods. This is one of the most commonly used standardized measures of wealth by economists.
+2. Sheet 2 contains 2018 Happiness index data, which is a survey conducted by the World Happiness Report. A representative sample is collected in each country and participants are asked to rate their happiness from 0 to 10, with 0 being "the worst possible life" and 10 being "the best possible life".
+3. Sheet 3 contains geographic info on each country, as well as the most commonly used standard official English name for each country.
+
+Note: the country code in each data frame is the official ISO 3166-1 country codes use by the United Nations and other international organizations to uniquely identify each country.
+
+
+
+
+### Part 2A <small>8pts</small>
+
+
+Perform the following data cleaning/processing operations:
+
+1. Read in each of the 3 sheets into 3 separate data frames named (in the same order) `gdp`, `happy`, and `geo`.
+2. For the `gdp` and `happy` data frames, keep only the country code column and main data column containing the GDP values or Happiness scores. Do NOT keep the country name column from either data frame, since these names are not the most standard official English names.
+3. Join the 3 data frames together into a single data frame named `country` using country code as the matching column, keeping ALL rows that exist in ANY data frame. (Hint: join functions only work with 2 data frames at a time, so you need to first join two of them, then use join again to add the third.)
+4. Rename and reorder the columns appropriately so that your final columns look EXACTLY like this: `code`, `name`, `continent`, `gdp`, `happy`.
+5. Sort the rows by name (A.. at the top)
+6. Finally, use `print()` to **print out the first few rows** of your data frame!
+
+(hint: if you did this right, you should have 188 rows)
+
+```{r}
+# insert code below
+
+```
+
+
+
+
+### Part 2B <small>8pts</small>
+
+
+Make a plot showing happiness vs wealth with wealth on a logarithmic scale (very easy to do, just add `+ scale_x_log10()` at the end of your plotting code). Color each point according to which continent it belongs to, and add a straight line (i.e. line of best fit) through all the points.
+
+Hints: 1. Remember you can add a straight line by adding the argument `method="lm"` to `geom_smooth`. For best results, also add `se=FALSE` to disable error shading. 2. Set the `color` aesthetic inside `geom_point`, not the main `ggplot` function to avoid it being also inherited by `geom_smooth`. 3. Optional, but for best visual appearance, you can also add a `shape` aesthetic inside `geom_point` and set it to be `continent` as well to further distinguish the points.
+
+What do you observe? Is there an overall trend between wealth and happiness? Are there any obvious outliers? If yes, can you identify which country it is?
+
+```{r}
+# insert code below
+
+```
+
+
+
+### Submission on canvas <small>2pts</small>
+
+Now, ***please check BOTH files*** (the Rmd and HTML) for errors, and submit both on canvas. Properly checking and submitting all your exam files through Canvas is worth 2 more points, bringing the total to 50 points.
+
